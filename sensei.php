@@ -3,16 +3,28 @@
 
 add_action( 'gform_after_submission_25', 'create_post_and_redirect', 10, 2 );
 function create_post_and_redirect( $entry, $form ) {
-    // User data
-    $user_data = array(
-        'user_login'    => rgar( $entry, '1' ), // replace '1' with the ID of your Username field
-        'user_pass'     => rgar( $entry, '3' ), // replace '3' with the ID of your Password field
-        'user_email'    => rgar( $entry, '2' ), // replace '2' with the ID of your Email field
-        'role'          => 'sensei' // or whatever role the user should have
-    );
 
-    // Insert the user and get the ID
-    $user_id = wp_insert_user( $user_data );
+    $username = rgar( $entry, '1' );
+    $password = rgar( $entry, '3' );
+    $email    = rgar( $entry, '2' );
+
+    // Create empty password string if user is logged in so password doesn't change
+    $password = '';
+    if ( ! is_user_logged_in() ) {
+        $password = rgar( $entry, '3' );
+    }
+
+    // Check if the user exists
+    $user_id = username_exists( $username );
+
+    if ( ! $user_id && email_exists($email) == false ) { // User doesn't exist, create a new user
+        $user_id = wp_create_user( $username, $password, $email );
+    }
+
+    $user = new WP_User($user_id);
+
+    // Add 'sensei' role to the user
+    $user->add_role('sensei');
 
     // Check if user was created successfully
     if ( ! is_wp_error( $user_id ) ) {
@@ -28,30 +40,37 @@ function create_post_and_redirect( $entry, $form ) {
         // Insert the post and get the ID
         $post_id = wp_insert_post( $post_data );
 
+        // Add the post to the 'sensei-profile' category
+        $category = get_category_by_slug( 'sensei-profile' );
+        wp_set_post_terms( $post_id, array( $category->term_id ), 'category' );
+
+
         // Check if post was created successfully
         if ( ! is_wp_error( $post_id ) ) {
             // Get the URL of the new post
             $url = get_permalink( $post_id );
 
-            // Log in the user
-            $creds = array(
-                'user_login'    => $user_data['user_login'],
-                'user_password' => $user_data['user_pass'],
-                'remember'      => true
-            );
+            if( ! is_user_logged_in() ){ // Only sign in the user if they're not logged in
+                // Log in the user
+                $creds = array(
+                    'user_login'    => $username,
+                    'user_password' => $password,
+                    'remember'      => true
+                );
 
-            $user = wp_signon( $creds, false );
+                $user = wp_signon( $creds, false );
 
-            if ( is_wp_error( $user ) ) {
-                error_log( "Failed to log in user. Error: " . $user->get_error_message() );
-            } else {
-                // Log the redirection for debugging
-                error_log( "Redirecting to post with ID: " . $post_id );
-
-                // Redirect to the new post
-                wp_redirect( $url );
-                exit;
+                if ( is_wp_error( $user ) ) {
+                    error_log( "Failed to log in user. Error: " . $user->get_error_message() );
+                }
             }
+
+            // Log the redirection for debugging
+            error_log( "Redirecting to post with ID: " . $post_id );
+
+            // Redirect to the new post
+            wp_redirect( $url );
+            exit;
         } else {
             error_log( "Failed to create post. Error: " . $post_id->get_error_message() );
         }
@@ -73,3 +92,12 @@ function populate_email( $value ) {
     $current_user = wp_get_current_user();
     return $current_user->user_email; // Return the email of the logged in user
 }
+
+// Enque sensei.js file
+function bonsai_scripts() {
+    wp_enqueue_script( 'bonsai-script', plugin_dir_url( __FILE__ ) . 'js/sensei.js', array('jquery'), '1.0', true );
+
+    $logged_in = is_user_logged_in() ? 'true' : 'false';
+    wp_localize_script( 'bonsai-script', 'bonsai_data', array( 'logged_in' => $logged_in ) );
+}
+add_action( 'wp_enqueue_scripts', 'bonsai_scripts' );
