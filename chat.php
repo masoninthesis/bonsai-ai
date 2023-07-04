@@ -82,12 +82,3 @@ function gf_openai_comments($post_id, $username, $deshi_comment, $sensei_comment
         error_log('GravityForms Comment Creation: Failed to insert Sensei comment.');
     }
 }
-
-// Don't hide form 23 upon submission
-// add_filter('gform_get_form_filter', 'show_form_after_submission', 10, 2);
-// function show_form_after_submission($form_string, $form) {
-//     if ($form->id == 23) {
-//         remove_action('gform_after_submission', 'maybe_redirect_confirmation', 10, 2);
-//     }
-//     return $form_string;
-// }
