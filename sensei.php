@@ -40,10 +40,6 @@ function create_post_and_redirect( $entry, $form ) {
         // Insert the post and get the ID
         $post_id = wp_insert_post( $post_data );
 
-        // Add the post to the 'sensei-profile' category
-        // $category = get_category_by_slug( 'sensei-profile' );
-        // wp_set_post_terms( $post_id, array( $category->term_id ), 'category' );
-
 
         // Check if post was created successfully
         if ( ! is_wp_error( $post_id ) ) {
@@ -102,7 +98,7 @@ function bonsai_scripts() {
 }
 add_action( 'wp_enqueue_scripts', 'bonsai_scripts' );
 
-// Custom Post Type for sensei-profile
+// Custom Post Type for sensei profile
 add_action('init', 'create_sensei_post_type');
 
 function create_sensei_post_type() {

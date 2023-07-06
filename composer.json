@@ -1,0 +1,13 @@
+{
+    "name": "masoninthesis/bonsai-ai",
+    "description": "A plugin for Bonsai AI",
+    "type": "wordpress-plugin",
+    "require": {
+        "php": ">=7.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "BonsaiAI\\": "src/"
+        }
+    }
+}
