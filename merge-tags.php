@@ -105,3 +105,26 @@ function replace_current_post_content_and_comments($text, $form, $entry, $url_en
     }
     return $text;
 }
+
+// New Journal Entry Post Slug Merge tag
+add_filter( 'gform_custom_merge_tags', 'custom_merge_tags', 10, 4 );
+function custom_merge_tags( $merge_tags, $form_id, $fields, $element_id ) {
+    if ( $form_id != 21 ) return $merge_tags;
+
+    $merge_tags[] = array(
+        'label' => 'Post Slug',
+        'tag' => '{post_slug}'
+    );
+
+    return $merge_tags;
+}
+
+add_filter( 'gform_replace_merge_tags', 'replace_post_slug_merge_tag', 10, 7 );
+function replace_post_slug_merge_tag( $text, $form, $entry, $url_encode, $esc_html, $nl2br, $format ) {
+    if ( strpos( $text, '{post_slug}' ) === false ) return $text;
+
+    $post_id = rgar( $entry, 'post_id' );
+    $post_slug = get_post_field( 'post_name', $post_id );
+
+    return str_replace( '{post_slug}', $post_slug, $text );
+}
