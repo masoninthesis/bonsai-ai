@@ -38,6 +38,44 @@ function replace_all_posts_merge_tag($text, $form, $entry, $url_encode, $esc_htm
     return str_replace($custom_merge_tag, $replace_text, $text);
 }
 
+// Grab post excerpts by category and create a merge tag to list them in GF
+add_filter('gform_replace_merge_tags', 'replace_all_posts_excerpt_merge_tag', 10, 7);
+
+function replace_all_posts_excerpt_merge_tag($text, $form, $entry, $url_encode, $esc_html, $nl2br, $format) {
+    $custom_merge_tag = '{all_post_excerpts:journal-entries}';
+
+    if (strpos($text, $custom_merge_tag) === false) {
+        return $text;
+    }
+
+    $sensei_id = get_user_meta(get_current_user_id(), 'sensei_id', true);
+
+    $args = array(
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+        'category_name' => 'journal-entries',
+        'author' => $sensei_id,
+    );
+
+    $query = new WP_Query($args);
+
+    $post_details = [];
+
+    if ($query->have_posts()) {
+        while ($query->have_posts()) {
+            $query->the_post();
+            $post_details[] = get_the_title() . "\n\n" . get_the_excerpt();
+        }
+    }
+
+    wp_reset_postdata();
+
+    $replace_text = implode("\n\n------------------\n\n", $post_details);
+
+    return str_replace($custom_merge_tag, $replace_text, $text);
+}
+
+
 // Populate posts merge tag
 function populate_posts_merge_tag($value, $field, $name, $lead, $form) {
     if ($name != 'all_posts') {
@@ -104,4 +142,27 @@ function replace_current_post_content_and_comments($text, $form, $entry, $url_en
         return str_replace($custom_merge_tag, $post_content, $text);
     }
     return $text;
+}
+
+// New Journal Entry Post Slug Merge tag
+add_filter( 'gform_custom_merge_tags', 'custom_merge_tags', 10, 4 );
+function custom_merge_tags( $merge_tags, $form_id, $fields, $element_id ) {
+    if ( $form_id != 21 ) return $merge_tags;
+
+    $merge_tags[] = array(
+        'label' => 'Post Slug',
+        'tag' => '{post_slug}'
+    );
+
+    return $merge_tags;
+}
+
+add_filter( 'gform_replace_merge_tags', 'replace_post_slug_merge_tag', 10, 7 );
+function replace_post_slug_merge_tag( $text, $form, $entry, $url_encode, $esc_html, $nl2br, $format ) {
+    if ( strpos( $text, '{post_slug}' ) === false ) return $text;
+
+    $post_id = rgar( $entry, 'post_id' );
+    $post_slug = get_post_field( 'post_name', $post_id );
+
+    return str_replace( '{post_slug}', $post_slug, $text );
 }

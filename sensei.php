@@ -116,3 +116,13 @@ function create_sensei_post_type() {
         )
     );
 }
+
+// Sensei Post Type Excerpts
+function new_excerpt_more($more) {
+    global $post;
+    if($post->post_type == 'sensei'){
+        return ' ... <span class="grad-3">Subscribe to read more</span>.';
+    }
+    return $more;
+}
+add_filter('excerpt_more', 'new_excerpt_more', 999);
