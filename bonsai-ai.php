@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Bonsai AI
  * Description: A WordPress plugin that adds AI functionalities
- * Version: 0.0.1-alpha
+ * Version: 0.0.1-alpha-0.8
  * Author: Jackalope Labs
  * Author URI: https:/bonsai.so/
  */
