@@ -127,7 +127,7 @@ function new_excerpt_more($more) {
 }
 add_filter('excerpt_more', 'new_excerpt_more', 999);
 
-// Sensei Profile ACF Field Groups Editability
+// SenseiOS Profile ACF Field Groups Editability
 function sensei_os_head() {
     // Check if the acf_form function exists
     if ( ! function_exists('acf_form_head') ) {
@@ -152,6 +152,19 @@ function sensei_os_content() {
         }
     }
 
+    // Loop through each field group and create an ACF form for each one
+    foreach ($field_groups as $group_id) {
+        acf_form(array(
+            'post_id' => get_the_ID(), // use the ID of the current post
+            'field_groups' => [$group_id], // pass single field group each time
+            'form' => false, // set form to false
+            'return' => add_query_arg( 'updated', 'true', get_permalink() ),
+            'html_before_fields' => '',
+            'html_after_fields' => '<input type="submit" class="acf-button button button-primary button-large" value="Update">', // add update button after each field group
+            'submit_value' => 'Update',
+        ));
+    }
+
     acf_form(array(
         'post_id' => get_the_ID(), // use the ID of the current post
         'field_groups' => $field_groups,
@@ -164,3 +177,16 @@ function sensei_os_content() {
 
 }
 add_shortcode('sensei_os', 'sensei_os_content');
+
+// enqueue a script in WordPress which uses jQuery to add a button after each field group
+function additional_form_updates() {
+    wp_enqueue_script('jquery'); // Ensure jQuery is included
+    wp_add_inline_script('jquery-migrate', '
+        jQuery(document).ready(function($){
+            $(".acf-field-group").each(function() {
+                $(this).append("<input type=\"submit\" class=\"acf-button button button-primary btn btn-primary button-large\" value=\"Update\">");
+            });
+        });
+    ');
+}
+add_action('wp_enqueue_scripts', 'additional_form_updates');
