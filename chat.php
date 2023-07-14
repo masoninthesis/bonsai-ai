@@ -1,28 +1,63 @@
 <?php
 // This file handles functionality related to chat system
+// Ask Sensei Form
+// Post Creation
+add_action('gform_after_submission_22', 'create_ask_sensei_post', 10, 2);
 
-// Redirecting to the newly created post
-add_action('template_redirect', 'redirect_to_created_post');
+function create_ask_sensei_post($entry, $form) {
+    // extract data from the form
+    $post_title = rgar($entry, '3');
+    $question = rgar($entry, '1');
+    $response = GFCommon::replace_variables('{openai_feed_34}', $form, $entry);
 
-function redirect_to_created_post() {
-    if(isset($_GET['post_id'])) {
-        $post_id = intval($_GET['post_id']); // ensuring the received ID is an integer
-        $post_url = get_permalink($post_id);
+    // construct the post content using the question and response
+    $post_content = '<div class="alert alert-info">'.$question.'</div><div class="alert alert-success my-3 ml-5">'.$response.'</div>';
 
-        // If get_permalink() returns false, let's try another method:
-        if (!$post_url) {
-            $post_url = site_url() . "/?p=" . $post_id;
-        }
+    // get the category object by slug
+    $category = get_term_by('slug', 'ask-sensei', 'category');
 
-        // If we still don't have a URL, redirect to the home page:
-        if (!$post_url) {
-            $post_url = site_url();
-        }
+    // prepare the post data
+    $post_data = array(
+        'post_title'   => wp_strip_all_tags($post_title),
+        'post_content' => $post_content,
+        'post_status'  => 'publish',
+        'post_type'    => 'post',
+        'post_author'  => get_current_user_id(),
+        'comment_status' => 'open',
+        'post_category' => array( $category->term_id ),
+    );
 
-        wp_redirect($post_url);
+    // insert the post
+    $post_id = wp_insert_post($post_data);
+
+    // redirect to the newly created post
+    if($post_id){
+        wp_redirect(get_permalink($post_id));
         exit;
     }
 }
+
+// Redirect to newly created ask-sensei post
+// add_filter( 'gform_confirmation_22', 'custom_confirmation_22', 10, 4 );
+//
+// function custom_confirmation_22( $confirmation, $form, $entry, $ajax ) {
+//     if ( $form['id'] != 22 ) {
+//         return $confirmation;
+//     }
+//
+//     $post_id = gform_get_meta($entry['id'], 'new_post_id');
+//
+//     if ( ! $post_id ) {
+//         return $confirmation;
+//     }
+//
+//     $redirect_url = get_permalink( $post_id );
+//     if ( $redirect_url ) {
+//         $confirmation = array( 'redirect' => $redirect_url );
+//     }
+//
+//     return $confirmation;
+// }
 
 // This hook is triggered after Form #23 is submitted to create a comment for the post
 add_action('gform_after_submission_23', 'post_to_third_party', 10, 2);
