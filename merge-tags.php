@@ -166,3 +166,43 @@ function replace_post_slug_merge_tag( $text, $form, $entry, $url_encode, $esc_ht
 
     return str_replace( '{post_slug}', $post_slug, $text );
 }
+
+// SenseiOS Merge Tag
+add_filter( 'gform_replace_merge_tags', 'replace_senseios_fields_merge_tag', 10, 7 );
+function replace_senseios_fields_merge_tag( $text, $form, $entry, $url_encode, $esc_html, $nl2br, $format ) {
+    $custom_merge_tag = '{senseios_fields}';
+
+    if ( strpos( $text, $custom_merge_tag ) === false ) {
+        return $text;
+    }
+
+    $senseios_fields_content = display_senseios_fields();
+
+    return str_replace( $custom_merge_tag, $senseios_fields_content, $text );
+}
+
+function display_senseios_fields() {
+    $output = '';
+
+    for($i = 1; $i <= 100; $i++) {
+        $field_group = 'senseios_' . $i;
+
+        if( have_rows($field_group) ) {
+            while( have_rows($field_group) ) {
+                the_row();
+
+                $title = get_sub_field('title');
+                $prompt = get_sub_field('prompt');
+                $entry = get_sub_field('entry');
+                $weight = get_sub_field('weight');
+
+                $output .= "Title: $title\n";
+                $output .= "Prompt: $prompt\n";
+                $output .= "Entry: $entry\n";
+                $output .= "Weight: $weight\n";
+            }
+        }
+    }
+
+    return $output;
+}
