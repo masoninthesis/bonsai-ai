@@ -121,59 +121,42 @@ function create_sensei_post_type() {
 function new_excerpt_more($more) {
     global $post;
     if($post->post_type == 'sensei'){
-        return ' ... <span class="grad-3">Subscribe to read more</span>.';
+        return ' ... <strong>Subscribe to read more</strong>.';
     }
     return $more;
 }
 add_filter('excerpt_more', 'new_excerpt_more', 999);
 
-// SenseiOS Profile ACF Field Groups Editability
-function sensei_os_head() {
-    // Check if the acf_form function exists
-    if ( ! function_exists('acf_form_head') ) {
-        return;
+// SenseiOS Forms Shortcodes
+function senseios_shortcode($atts) {
+    // Shortcode attributes
+    $atts = shortcode_atts(
+        array(
+            'field' => 'senseios_1',
+        ),
+        $atts
+    );
+
+    $post_id = get_the_ID(); // Get current post ID
+    $author_id = get_post_field('post_author', $post_id); // Get post author ID
+    $current_user_id = get_current_user_id(); // Get current logged in user ID
+    $output = '';
+
+    // Check if current user is the author of the post
+    if ($author_id == $current_user_id) {
+        ob_start();
+        $form = array(
+            'id' => 'acf-form',
+            'post_id' => $post_id,
+            'fields' => array($atts['field']), // The name of your group field
+            'return' => '', // Return URL
+            'submit_value' => 'Update' // Text for the submit button
+        );
+        acf_form($form);
+        $output = ob_get_clean();
     }
-    acf_form_head();
+
+    return $output;
 }
-add_action('get_header', 'sensei_os_head');
 
-function sensei_os_content() {
-    if ( ! function_exists('acf_form') ) {
-        return;
-    }
-
-    acf_enqueue_uploader(); // Needed for form to function properly
-
-    $field_groups = [];
-    for($i = 1; $i <= 150; $i++) {
-        $field_group_id = 'group_' . sprintf('%03d', $i);
-        if( acf_get_field_group($field_group_id) ) {
-            $field_groups[] = $field_group_id;
-        }
-    }
-
-    // Loop through each field group and create an ACF form for each one
-    foreach ($field_groups as $group_id) {
-        acf_form(array(
-            'post_id' => get_the_ID(), // use the ID of the current post
-            'field_groups' => [$group_id], // pass single field group each time
-            'form' => false, // set form to false
-            'return' => add_query_arg( 'updated', 'true', get_permalink() ),
-            'html_before_fields' => '',
-            'html_after_fields' => '<input type="submit" class="acf-button button button-primary button-large" value="Update">', // add update button after each field group
-            'submit_value' => 'Update',
-        ));
-    }
-
-    acf_form(array(
-        'post_id' => get_the_ID(), // use the ID of the current post
-        'field_groups' => $field_groups,
-        'form' => true,
-        'return' => add_query_arg( 'updated', 'true', get_permalink() ),
-        'html_before_fields' => '',
-        'html_after_fields' => '',
-        'submit_value' => 'Update',
-    ));
-
-}
-add_shortcode('sensei_os', 'sensei_os_content');
+add_shortcode('senseios', 'senseios_shortcode');
