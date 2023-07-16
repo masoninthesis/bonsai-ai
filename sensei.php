@@ -177,16 +177,3 @@ function sensei_os_content() {
 
 }
 add_shortcode('sensei_os', 'sensei_os_content');
-
-// enqueue a script in WordPress which uses jQuery to add a button after each field group
-function additional_form_updates() {
-    wp_enqueue_script('jquery'); // Ensure jQuery is included
-    wp_add_inline_script('jquery-migrate', '
-        jQuery(document).ready(function($){
-            $(".acf-field-group").each(function() {
-                $(this).append("<input type=\"submit\" class=\"acf-button button button-primary btn btn-primary button-large\" value=\"Update\">");
-            });
-        });
-    ');
-}
-add_action('wp_enqueue_scripts', 'additional_form_updates');
