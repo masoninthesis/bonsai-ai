@@ -206,3 +206,22 @@ function display_senseios_fields() {
 
     return $output;
 }
+
+// Sensei and Deshi username merge tags
+add_filter( 'gform_replace_merge_tags', 'username_replace_merge_tags', 10, 7 );
+function username_replace_merge_tags( $text, $form, $entry, $url_encode, $esc_html, $nl2br, $format ) {
+    $post = get_post();
+
+    if ( is_object( $post ) ) {
+        $author_name = get_the_author_meta( 'display_name', $post->post_author );
+        $text = str_replace( '{current_post_author}', $author_name, $text );
+    }
+
+    $current_user = wp_get_current_user();
+    if ( $current_user->exists() ) {
+        $current_username = $current_user->user_login;
+        $text = str_replace( '{current_user}', $current_username, $text );
+    }
+
+    return $text;
+}

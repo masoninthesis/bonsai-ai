@@ -90,13 +90,13 @@ function populate_email( $value ) {
 }
 
 // Enque sensei.js file
-function bonsai_scripts() {
-    wp_enqueue_script( 'bonsai-script', plugin_dir_url( __FILE__ ) . 'js/sensei.js', array('jquery'), '1.0', true );
-
-    $logged_in = is_user_logged_in() ? 'true' : 'false';
-    wp_localize_script( 'bonsai-script', 'bonsai_data', array( 'logged_in' => $logged_in ) );
-}
-add_action( 'wp_enqueue_scripts', 'bonsai_scripts' );
+// function bonsai_scripts() {
+//     wp_enqueue_script( 'bonsai-script', plugin_dir_url( __FILE__ ) . 'js/sensei.js', array('jquery'), '1.0', true );
+//
+//     $logged_in = is_user_logged_in() ? 'true' : 'false';
+//     wp_localize_script( 'bonsai-script', 'bonsai_data', array( 'logged_in' => $logged_in ) );
+// }
+// add_action( 'wp_enqueue_scripts', 'bonsai_scripts' );
 
 // Custom Post Type for sensei profile
 add_action('init', 'create_sensei_post_type');
@@ -112,7 +112,7 @@ function create_sensei_post_type() {
             'has_archive' => true,
             'rewrite' => array('slug' => 'sensei'),
             'show_in_rest' => true,
-            'supports' => array('title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments'),
+            'supports' => array('title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments', 'revisions'),
         )
     );
 }
@@ -177,3 +177,37 @@ function sensei_os_content() {
 
 }
 add_shortcode('sensei_os', 'sensei_os_content');
+
+// SenseiOS Forms Shortcodes
+function senseios_shortcode($atts) {
+    // Shortcode attributes
+    $atts = shortcode_atts(
+        array(
+            'field' => 'senseios_1',
+        ),
+        $atts
+    );
+
+    $post_id = get_the_ID(); // Get current post ID
+    $author_id = get_post_field('post_author', $post_id); // Get post author ID
+    $current_user_id = get_current_user_id(); // Get current logged in user ID
+    $output = '';
+
+    // Check if current user is the author of the post
+    if ($author_id == $current_user_id) {
+        ob_start();
+        $form = array(
+            'id' => 'acf-form',
+            'post_id' => $post_id,
+            'fields' => array($atts['field']), // The name of your group field
+            'return' => '', // Return URL
+            'submit_value' => 'Update' // Text for the submit button
+        );
+        acf_form($form);
+        $output = ob_get_clean();
+    }
+
+    return $output;
+}
+
+add_shortcode('senseios', 'senseios_shortcode');
