@@ -25,3 +25,4 @@ require_once plugin_dir_path(__FILE__) . 'chat.php';
 require_once plugin_dir_path(__FILE__) . 'filters.php';
 require_once plugin_dir_path( __FILE__ ) . 'sensei.php';
 require_once plugin_dir_path( __FILE__ ) . 'subscribe.php';
+require_once plugin_dir_path( __FILE__ ) . 'directives.php';
