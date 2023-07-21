@@ -112,7 +112,7 @@ function create_sensei_post_type() {
             'has_archive' => true,
             'rewrite' => array('slug' => 'sensei'),
             'show_in_rest' => true,
-            'supports' => array('title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments', 'revisions'),
+            'supports' => array('title', 'editor', 'author', 'thumbnail', 'excerpt', 'revisions'),
         )
     );
 }
