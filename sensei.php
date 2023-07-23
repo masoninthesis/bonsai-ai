@@ -128,16 +128,17 @@ function new_excerpt_more($more) {
 add_filter('excerpt_more', 'new_excerpt_more', 999);
 
 // SenseiOS Profile ACF Field Groups Editability
-function sensei_os_head() {
+function senseios_all_head() {
     // Check if the acf_form function exists
     if ( ! function_exists('acf_form_head') ) {
         return;
     }
     acf_form_head();
 }
-add_action('get_header', 'sensei_os_head');
+add_action('get_header', 'senseios_all_head');
 
-function sensei_os_content() {
+// SenseiOS All fields in a form shortcode
+function senseios_all_content() {
     if ( ! function_exists('acf_form') ) {
         return;
     }
@@ -166,17 +167,16 @@ function sensei_os_content() {
     }
 
     acf_form(array(
-        'post_id' => get_the_ID(), // use the ID of the current post
-        'field_groups' => $field_groups,
-        'form' => true,
+        'post_id' => get_the_ID(),
+        'field_groups' => ['group_64b061d56b6cc'], // Only include the 'senseiOS' field group
+        'form' => false,
         'return' => add_query_arg( 'updated', 'true', get_permalink() ),
         'html_before_fields' => '',
-        'html_after_fields' => '',
+        'html_after_fields' => '<input type="submit" class="acf-button button button-primary button-large" value="Update">',
         'submit_value' => 'Update',
     ));
-
 }
-add_shortcode('sensei_os', 'sensei_os_content');
+add_shortcode('senseios_all', 'senseios_all_content');
 
 // SenseiOS Forms Shortcodes
 function senseios_shortcode($atts) {
