@@ -153,7 +153,7 @@ function senseios_all_content() {
         }
     }
 
-    // Loop through each field group and create an ACF form for each one
+    // Loop through each field group and create fields for each one
     foreach ($field_groups as $group_id) {
         acf_form(array(
             'post_id' => get_the_ID(), // use the ID of the current post
@@ -161,18 +161,19 @@ function senseios_all_content() {
             'form' => false, // set form to false
             'return' => add_query_arg( 'updated', 'true', get_permalink() ),
             'html_before_fields' => '',
-            'html_after_fields' => '<input type="submit" class="acf-button button button-primary button-large" value="Update">', // add update button after each field group
-            'submit_value' => 'Update',
+            'html_after_fields' => '', // don't add a submit button after each field group
+            'submit_value' => '',
         ));
     }
 
+    // Add the senseiOS field group
     acf_form(array(
         'post_id' => get_the_ID(),
         'field_groups' => ['group_64b061d56b6cc'], // Only include the 'senseiOS' field group
-        'form' => false,
+        'form' => true,
         'return' => add_query_arg( 'updated', 'true', get_permalink() ),
         'html_before_fields' => '',
-        'html_after_fields' => '<input type="submit" class="acf-button button button-primary button-large" value="Update">',
+        'html_after_fields' => '', // add a single submit button after all fields
         'submit_value' => 'Update',
     ));
 }
