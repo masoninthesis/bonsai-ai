@@ -89,15 +89,6 @@ function populate_email( $value ) {
     return $current_user->user_email; // Return the email of the logged in user
 }
 
-// Enque sensei.js file
-// function bonsai_scripts() {
-//     wp_enqueue_script( 'bonsai-script', plugin_dir_url( __FILE__ ) . 'js/sensei.js', array('jquery'), '1.0', true );
-//
-//     $logged_in = is_user_logged_in() ? 'true' : 'false';
-//     wp_localize_script( 'bonsai-script', 'bonsai_data', array( 'logged_in' => $logged_in ) );
-// }
-// add_action( 'wp_enqueue_scripts', 'bonsai_scripts' );
-
 // Custom Post Type for sensei profile
 add_action('init', 'create_sensei_post_type');
 
