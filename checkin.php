@@ -5,27 +5,48 @@
 add_action('gform_after_submission_33', 'post_checkin_comments', 10, 2);
 function post_checkin_comments($entry, $form)
 {
-    $post_id = $entry[4];
-    $username = $entry[5];
-    $deshi_comment = $entry[1];
+    // Check for both possible key structures
+    $post_id = isset($entry[4]) ? $entry[4] : (isset($entry['4_0']) ? $entry['4_0'] : null);
+    $username = isset($entry[5]) ? $entry[5] : (isset($entry['5_0']) ? $entry['5_0'] : null);
+    $deshi_comment = isset($entry[1]) ? $entry[1] : (isset($entry['1_0']) ? $entry['1_0'] : null);
+
     $sensei_comment = GFCommon::replace_variables('{openai_feed_63}', $form, $entry);
+    error_log('Entry Data: ' . print_r($entry, true));
 
     gf_openai_checkins($post_id, $username, $deshi_comment, $sensei_comment);
 }
 
 function gf_openai_checkins($post_id, $username, $deshi_comment, $sensei_comment)
 {
-    if (empty($post_id) || empty($username) || empty($deshi_comment) || empty($sensei_comment)) {
-        error_log('GravityForms Comment Creation: Missing required data.');
+    if (empty($post_id)) {
+        error_log('GravityForms Comment Creation: Missing post ID.');
         return;
     }
+
+    if (empty($username)) {
+        error_log('GravityForms Comment Creation: Missing username.');
+        return;
+    }
+
+    if (empty($deshi_comment)) {
+        error_log('GravityForms Comment Creation: Missing Deshi comment.');
+        return;
+    }
+
+    if (empty($sensei_comment)) {
+        error_log('GravityForms Comment Creation: Missing Sensei comment.');
+        return;
+    }
+
+    $post = get_post($post_id);
+    $author_email = get_the_author_meta('user_email', $post->post_author);
 
     $time = current_time('mysql');
 
     $data = array(
         'comment_post_ID' => $post_id,
         'comment_author' => $username,
-        'comment_author_email' => 'email@example.com',
+        'comment_author_email' => $author_email,
         'comment_author_url' => 'https://',
         'comment_content' => $deshi_comment,
         'comment_type' => '',
