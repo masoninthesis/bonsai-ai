@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Bonsai AI
  * Description: A WordPress plugin that adds AI functionalities such as Sensei AI, and SenseiOS
- * Version: 0.0.1-alpha-0.27
+ * Version: 0.0.1-alpha-0.28
  * Author: Jackalope Labs
  * Author URI: https://bonsai.so/
  */
@@ -21,6 +21,7 @@ $plugin_files = array(
     'chat',
     'checkin',
     'daily-checkins',
+    'deshi',
     'directives',
     'filters',
     'followup',
