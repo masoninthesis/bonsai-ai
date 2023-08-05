@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Bonsai AI
  * Description: A WordPress plugin that adds AI functionalities such as Sensei AI, and SenseiOS
- * Version: 0.0.1-alpha-0.29
+ * Version: 0.0.1-alpha-0.30
  * Author: Jackalope Labs
  * Author URI: https://bonsai.so/
  */
@@ -19,12 +19,12 @@ if ( ! defined( 'BONSAI_AI_PLUGIN_FILE' ) ) {
 $plugin_files = array(
     'ask-sensei',
     'chat',
-    'checkin',
     'daily-checkins',
     'deshi',
     'directives',
     'filters',
     'followup',
+    'goal-checkin',
     'journal-entries',
     'journal-prompts',
     'login',
@@ -39,7 +39,7 @@ foreach ($plugin_files as $file) {
     require_once plugin_dir_path( BONSAI_AI_PLUGIN_FILE ) . $file . '.php';
 }
 
-// Sensei Upgrade: Sensei upgrade password field is hidden if deshi user is already logged in
+// Sensei JS
 function hide_field_for_logged_in_users() {
     if (is_user_logged_in()) {
         wp_enqueue_script('hide-form-field', plugins_url('/js/sensei.js', __FILE__), array('jquery'), null, true);
