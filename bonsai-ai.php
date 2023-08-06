@@ -2,44 +2,38 @@
 /**
  * Plugin Name: Bonsai AI
  * Description: A WordPress plugin that adds AI functionalities such as Sensei AI, and SenseiOS
- * Version: 0.0.1-alpha-0.30
+ * Version: 0.0.1-alpha-0.32
  * Author: Jackalope Labs
- * Author URI: https://bonsai.so/
+ * Author URI: https:/bonsai.so/
  */
 
 // Exit if accessed directly.
-defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 // Define BONSAI_AI_PLUGIN_FILE.
 if ( ! defined( 'BONSAI_AI_PLUGIN_FILE' ) ) {
-    define( 'BONSAI_AI_PLUGIN_FILE', __FILE__ );
+	define( 'BONSAI_AI_PLUGIN_FILE', __FILE__ );
 }
 
-// List of plugin files to include
-$plugin_files = array(
-    'ask-sensei',
-    'chat',
-    'daily-checkins',
-    'deshi',
-    'directives',
-    'filters',
-    'followup',
-    'goal-checkin',
-    'journal-entries',
-    'journal-prompts',
-    'login',
-    'merge-tags',
-    'sensei',
-    'set-goal',
-    'subscribe'
-);
+// Include the files.
+require_once plugin_dir_path( BONSAI_AI_PLUGIN_FILE ) . 'merge-tags.php';
+require_once plugin_dir_path( BONSAI_AI_PLUGIN_FILE ) . 'journal-prompts.php';
+require_once plugin_dir_path(__FILE__) . 'journal-entries.php';
+require_once plugin_dir_path(__FILE__) . 'ask-sensei.php';
+require_once plugin_dir_path(__FILE__) . 'chat.php';
+require_once plugin_dir_path(__FILE__) . 'filters.php';
+require_once plugin_dir_path(__FILE__) . 'followup.php';
+setup_followup_hooks(__FILE__);
+require_once plugin_dir_path( __FILE__ ) . 'set-goal.php';
+require_once plugin_dir_path( __FILE__ ) . 'goal-checkin.php';
+require_once plugin_dir_path( __FILE__ ) . 'sensei.php';
+require_once plugin_dir_path( __FILE__ ) . 'subscribe.php';
+require_once plugin_dir_path( __FILE__ ) . 'directives.php';
+require_once plugin_dir_path( __FILE__ ) . 'daily-checkins.php';
 
-// Include the plugin files.
-foreach ($plugin_files as $file) {
-    require_once plugin_dir_path( BONSAI_AI_PLUGIN_FILE ) . $file . '.php';
-}
-
-// Sensei JS
+// Sensei Upgrade: Sensei upgrade password field is hidden if deshi user is already logged in
 function hide_field_for_logged_in_users() {
     if (is_user_logged_in()) {
         wp_enqueue_script('hide-form-field', plugins_url('/js/sensei.js', __FILE__), array('jquery'), null, true);
