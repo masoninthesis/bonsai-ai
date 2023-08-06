@@ -9,8 +9,8 @@ function post_checkin_comments($entry, $form)
     $post_id = isset($entry[4]) ? $entry[4] : (isset($entry['4_0']) ? $entry['4_0'] : null);
     $username = isset($entry[5]) ? $entry[5] : (isset($entry['5_0']) ? $entry['5_0'] : null);
     $deshi_comment = isset($entry[1]) ? $entry[1] : (isset($entry['1_0']) ? $entry['1_0'] : null);
-
     $sensei_comment = GFCommon::replace_variables('{openai_feed_63}', $form, $entry);
+
     error_log('Entry Data: ' . print_r($entry, true));
 
     gf_openai_checkins($post_id, $username, $deshi_comment, $sensei_comment);
@@ -40,7 +40,6 @@ function gf_openai_checkins($post_id, $username, $deshi_comment, $sensei_comment
 
     $post = get_post($post_id);
     $author_email = get_the_author_meta('user_email', $post->post_author);
-
     $time = current_time('mysql');
 
     $data = array(
@@ -58,25 +57,26 @@ function gf_openai_checkins($post_id, $username, $deshi_comment, $sensei_comment
         'comment_approved' => 1,
     );
 
-    $comment_id = wp_insert_comment($data);
+    // Only insert the Deshi comment if it's not the [timeout] response.
+    if ($deshi_comment !== '[timeout]') {
+        $comment_id = wp_insert_comment($data);
 
-    if ($comment_id instanceof WP_Error) {
-        error_log('GravityForms Comment Creation: Error inserting Deshi comment: ' . $comment_id->get_error_message());
-    } elseif ($comment_id) {
-        error_log('GravityForms Comment Creation: Deshi comment inserted successfully.');
+        if ($comment_id instanceof WP_Error) {
+            error_log('GravityForms Comment Creation: Error inserting Deshi comment: ' . $comment_id->get_error_message());
+        } elseif ($comment_id) {
+            error_log('GravityForms Comment Creation: Deshi comment inserted successfully.');
+        } else {
+            error_log('GravityForms Comment Creation: Failed to insert Deshi comment.');
+        }
     } else {
-        error_log('GravityForms Comment Creation: Failed to insert Deshi comment.');
+        // Set the comment_id to 0 so that Sensei's comment is not a reply to any comment.
+        $comment_id = 0;
     }
 
     // Define a new data array for the Sensei comment.
     $sensei_data = $data;
     $sensei_data['comment_author'] = 'Sensei';
-
-    $sensei_comment = str_replace("\n", "\n\n", $sensei_comment);  // Updated line
-    $sensei_data['comment_content'] = $sensei_comment;  // Moved line
-
-    error_log('Sensei comment before insertion: ' . $sensei_comment);
-
+    $sensei_data['comment_content'] = $sensei_comment;
     $sensei_data['comment_parent'] = $comment_id;
 
     $sensei_comment_id = wp_insert_comment($sensei_data);
