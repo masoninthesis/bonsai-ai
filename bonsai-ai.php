@@ -29,7 +29,7 @@ require_once plugin_dir_path(__FILE__) . 'journal-entries.php';
 require_once plugin_dir_path(__FILE__) . 'ask-sensei.php';
 require_once plugin_dir_path(__FILE__) . 'chat.php';
 require_once plugin_dir_path(__FILE__) . 'filters.php';
-require_once plugin_dir_path(__FILE__) . 'followup.php';
+// require_once plugin_dir_path(__FILE__) . 'followup.php';
 require_once plugin_dir_path( __FILE__ ) . 'set-goal.php';
 require_once plugin_dir_path( __FILE__ ) . 'goal-checkin.php';
 require_once plugin_dir_path( __FILE__ ) . 'sensei.php';
