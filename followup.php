@@ -1,5 +1,6 @@
 <?php
-// Assuming you have other initializations and includes here
+
+require_once '/srv/www/bonsai.so/current/web/app/plugins/gravityforms-openai/class-gwiz-gf-openai.php';
 
 // Get all posts in the 'goals-journal-entries' category from the last 7 days
 $args = array(
@@ -14,6 +15,14 @@ $args = array(
 $posts = get_posts($args);
 
 error_log('Total posts fetched from the last 7 days: ' . count($posts));
+
+$user_id = 1;  // Set the user ID
+wp_set_current_user($user_id);
+$current_user = wp_get_current_user();  // Get the current user object
+$user_email = $current_user->user_email;  // Get the user's email
+$form_id = 33;  // Set the form ID
+
+$openai_instance = GWiz_GF_OpenAI::get_instance();
 
 foreach ($posts as $post) {
     error_log('Processing post ID: ' . $post->ID . ' | Post date: ' . $post->post_date);
@@ -47,11 +56,47 @@ foreach ($posts as $post) {
         error_log("Recent Deshi check-in found for post ID: " . $post->ID);
         error_log("Time of the most recent Deshi comment: " . $most_recent_deshi_comment_time);
     } else {
-        error_log("Recent Deshi check-in not found for post ID: " . $post->ID);
-        if ($most_recent_deshi_comment_time) {
-            error_log("Time of the most recent Deshi comment: " . $most_recent_deshi_comment_time);
-        } else {
+        if (!$most_recent_deshi_comment_time) {
             error_log("No comments found from the Deshi for post ID: " . $post->ID);
+
+            // Generate automatic response and submit it
+            $response = '[timeout]';
+
+            $entry = array(
+                'form_id' => $form_id,
+                'date_created' => current_time('mysql', 0),
+                'is_read' => 0,
+                'is_starred' => 0,
+                'ip' => '127.0.0.1',
+                'source_url' => site_url(),
+                'user_agent' => 'Bonsai AI Plugin',
+                'status' => 'active',
+                '1' => $response,
+                '4' => strval($post->ID),
+                '5' => $current_user->user_login,
+                '6' => $user_email,
+                '7' => time(),
+            );
+
+            $entry_id = GFAPI::add_entry($entry);
+
+            if (is_wp_error($entry_id)) {
+                error_log('Error creating form entry: ' . $entry_id->get_error_message());
+            } else {
+                error_log('Form entry created with ID: ' . $entry_id);
+
+                // Fetch the form and process feeds for the new entry
+                $form = GFAPI::get_form($form_id);
+                $entry = GFAPI::get_entry($entry_id);
+                $feeds = GFAPI::get_feeds(null, $form_id);
+                foreach ($feeds as $feed) {
+                    $openai_instance->process_feed($feed, $entry, $form);
+                }
+            }
+        } else {
+            error_log("Recent Deshi check-in not found for post ID: " . $post->ID);
+            error_log("Time of the most recent Deshi comment: " . $most_recent_deshi_comment_time);
         }
     }
 }
+?>

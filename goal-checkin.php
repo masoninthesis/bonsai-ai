@@ -18,6 +18,13 @@ function post_checkin_comments($entry, $form)
 
 function gf_openai_checkins($post_id, $username, $deshi_comment, $sensei_comment) {
     $post = get_post($post_id);
+
+    // Check if $post is a valid object
+    if (!$post) {
+        error_log('Error: Invalid post ID or post not found: ' . $post_id);
+        return; // Exit the function if no valid post object is found
+    }
+
     $author_email = get_the_author_meta('user_email', $post->post_author);
     $time = current_time('mysql');
 
@@ -54,6 +61,7 @@ function gf_openai_checkins($post_id, $username, $deshi_comment, $sensei_comment
     // Insert the Sensei comment
     $sensei_comment_id = wp_insert_comment($sensei_data);
 }
+
 
 // comment fomatting
 add_filter('gform_save_field_value', 'preserve_line_breaks_in_multiline_text', 10, 5);
