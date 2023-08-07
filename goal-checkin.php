@@ -3,8 +3,9 @@
 
 // This hook is triggered after Form #33 is submitted to create a comment for the post
 add_action('gform_after_submission_33', 'post_checkin_comments', 10, 2);
-function post_checkin_comments($entry, $form)
-{
+function post_checkin_comments($entry, $form) {
+    error_log('gform_after_submission_33 hook triggered.');
+
     // Check for both possible key structures
     $post_id = isset($entry[4]) ? $entry[4] : (isset($entry['4_0']) ? $entry['4_0'] : null);
     $username = isset($entry[5]) ? $entry[5] : (isset($entry['5_0']) ? $entry['5_0'] : null);

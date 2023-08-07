@@ -1,6 +1,7 @@
 <?php
 
 require_once '/srv/www/bonsai.so/current/web/app/plugins/gravityforms-openai/class-gwiz-gf-openai.php';
+require_once '/srv/www/bonsai.so/current/web/app/plugins/bonsai-ai/goal-checkin.php';  // Include the goal-checkin.php file
 
 // Get all posts in the 'goals-journal-entries' category from the last 7 days
 $args = array(
@@ -75,7 +76,6 @@ foreach ($posts as $post) {
                 '4' => strval($post->ID),
                 '5' => $current_user->user_login,
                 '6' => $user_email,
-                '7' => time(),
             );
 
             $entry_id = GFAPI::add_entry($entry);
@@ -88,6 +88,7 @@ foreach ($posts as $post) {
                 // Fetch the form and process feeds for the new entry
                 $form = GFAPI::get_form($form_id);
                 $entry = GFAPI::get_entry($entry_id);
+                post_checkin_comments($entry, $form);  // Manually trigger post_checkin_comments function
                 $feeds = GFAPI::get_feeds(null, $form_id);
                 foreach ($feeds as $feed) {
                     $openai_instance->process_feed($feed, $entry, $form);
