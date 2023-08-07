@@ -16,32 +16,12 @@ function post_checkin_comments($entry, $form)
     gf_openai_checkins($post_id, $username, $deshi_comment, $sensei_comment);
 }
 
-function gf_openai_checkins($post_id, $username, $deshi_comment, $sensei_comment)
-{
-    if (empty($post_id)) {
-        error_log('GravityForms Comment Creation: Missing post ID.');
-        return;
-    }
-
-    if (empty($username)) {
-        error_log('GravityForms Comment Creation: Missing username.');
-        return;
-    }
-
-    if (empty($deshi_comment)) {
-        error_log('GravityForms Comment Creation: Missing Deshi comment.');
-        return;
-    }
-
-    if (empty($sensei_comment)) {
-        error_log('GravityForms Comment Creation: Missing Sensei comment.');
-        return;
-    }
-
+function gf_openai_checkins($post_id, $username, $deshi_comment, $sensei_comment) {
     $post = get_post($post_id);
     $author_email = get_the_author_meta('user_email', $post->post_author);
     $time = current_time('mysql');
 
+    // Deshi comment data
     $data = array(
         'comment_post_ID' => $post_id,
         'comment_author' => $username,
@@ -50,44 +30,29 @@ function gf_openai_checkins($post_id, $username, $deshi_comment, $sensei_comment
         'comment_content' => $deshi_comment,
         'comment_type' => '',
         'comment_parent' => 0,
-        'user_id' => 1,
+        'user_id' => $post->post_author, // Set the Deshi comment user_id to the post's author ID
         'comment_author_IP' => '127.0.0.1',
         'comment_agent' => 'Mozilla/5.0 (Mac; Intel Mac OS X 10.15; rv:77.0) Gecko/20100101 Firefox/77.0',
         'comment_date' => $time,
         'comment_approved' => 1,
     );
 
-    // Only insert the Deshi comment if it's not the [timeout] response.
+    // Insert the Deshi comment
     if ($deshi_comment !== '[timeout]') {
         $comment_id = wp_insert_comment($data);
-
-        if ($comment_id instanceof WP_Error) {
-            error_log('GravityForms Comment Creation: Error inserting Deshi comment: ' . $comment_id->get_error_message());
-        } elseif ($comment_id) {
-            error_log('GravityForms Comment Creation: Deshi comment inserted successfully.');
-        } else {
-            error_log('GravityForms Comment Creation: Failed to insert Deshi comment.');
-        }
     } else {
-        // Set the comment_id to 0 so that Sensei's comment is not a reply to any comment.
         $comment_id = 0;
     }
 
-    // Define a new data array for the Sensei comment.
+    // Sensei comment data (overwrite necessary fields)
     $sensei_data = $data;
     $sensei_data['comment_author'] = 'Sensei';
     $sensei_data['comment_content'] = $sensei_comment;
     $sensei_data['comment_parent'] = $comment_id;
+    $sensei_data['user_id'] = 1; // Set the Sensei comment user_id to 1
 
+    // Insert the Sensei comment
     $sensei_comment_id = wp_insert_comment($sensei_data);
-
-    if ($sensei_comment_id instanceof WP_Error) {
-        error_log('GravityForms Comment Creation: Error inserting Sensei comment: ' . $sensei_comment_id->get_error_message());
-    } elseif ($sensei_comment_id) {
-        error_log('GravityForms Comment Creation: Sensei comment inserted successfully.');
-    } else {
-        error_log('GravityForms Comment Creation: Failed to insert Sensei comment.');
-    }
 }
 
 // comment fomatting

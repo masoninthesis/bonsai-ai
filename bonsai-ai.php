@@ -12,6 +12,11 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+// If WP-CLI is running, load the WP-CLI commands
+if (defined('WP_CLI') && WP_CLI) {
+    require_once plugin_dir_path(__FILE__) . 'bonsai-cli.php';
+}
+
 // Define BONSAI_AI_PLUGIN_FILE.
 if ( ! defined( 'BONSAI_AI_PLUGIN_FILE' ) ) {
 	define( 'BONSAI_AI_PLUGIN_FILE', __FILE__ );
@@ -25,7 +30,6 @@ require_once plugin_dir_path(__FILE__) . 'ask-sensei.php';
 require_once plugin_dir_path(__FILE__) . 'chat.php';
 require_once plugin_dir_path(__FILE__) . 'filters.php';
 require_once plugin_dir_path(__FILE__) . 'followup.php';
-setup_followup_hooks(__FILE__);
 require_once plugin_dir_path( __FILE__ ) . 'set-goal.php';
 require_once plugin_dir_path( __FILE__ ) . 'goal-checkin.php';
 require_once plugin_dir_path( __FILE__ ) . 'sensei.php';

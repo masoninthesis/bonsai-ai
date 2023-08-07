@@ -1,91 +1,43 @@
 <?php
-/**
- * This file handles functionality related to the Sensei AI's follow-up system
- */
+// Assuming you have other initializations and includes here
 
-// Sets user email
-add_filter('gform_field_value_user_email', 'populate_user_email');
-function populate_user_email($value){
-    $current_user = wp_get_current_user();
-    return $current_user->user_email;
-}
+// Get the comments for the post with ID 4175
+$args = array(
+    'post_id' => 4175,
+);
+$comments = get_comments($args);
 
-function check_for_responses() {
-    // Get all posts in the 'goals-journal-entries' category
-    $args = array(
-        'category_name' => 'goals-journal-entries',
-        'post_type' => 'post',
-        'post_status' => 'publish',
-        'numberposts' => -1
-    );
-    $posts = get_posts($args);
+// Get the post author ID
+$post_author_id = get_post_field('post_author', 4175);
 
-    error_log('Checking for responses. Found ' . count($posts) . ' posts.');
+$recent_comment_by_author = false;
+$most_recent_deshi_comment_time = null;
 
-    foreach ($posts as $post) {
-        // Get the comments of the post
-        $datetime = new DateTime();
-        $datetime->modify('-1 day');
-        $date = $datetime->format('Y-m-d H:i:s');
+// Iterate through the comments
+foreach ($comments as $comment) {
+    // Check if the comment is by the post's author
+    if ($comment->user_id == $post_author_id) {
+        // Update the most recent deshi comment time
+        $most_recent_deshi_comment_time = $comment->comment_date;
 
-        $comments = get_comments(array(
-            'post_id' => $post->ID,
-            'date_query' => array(
-                'after' => $date,
-            ),
-        ));
-
-        error_log('Checking for comments after date: ' . $date);
-        error_log('Found ' . count($comments) . ' comments for post ID ' . $post->ID);
-
-        if (!empty($comments)) {
-            // Generate automatic response and submit it
-            $response = '[timeout]';
-
-            // Submit the form
-            $form_id = 33;
-
-            $user_id = 1;
-            wp_set_current_user($user_id);
-            $current_user = wp_get_current_user();
-
-            // Get the user's email
-            $user_email = $current_user->user_email;
-
-            error_log('Current user login: ' . $current_user->user_login);
-
-            $input_values = array(
-                'input_1' => $response,
-                'input_4' => $post->ID,
-                'input_5' => $current_user->user_login,
-                'input_6' => $user_email,
-            );
-
-            $form = GFAPI::get_form($form_id);
-            $result = GFAPI::submit_form($form_id, $input_values);
-
-            if (is_wp_error($result)) {
-                error_log('GravityForms Form Submission: ' . $result->get_error_message());
-            } else {
-                error_log('GravityForms Form Submission: Submitted form ' . $form_id . ', result: ' . print_r($result, true));
-            }
+        // Check if the comment is less than 24 hours old
+        $time_difference = current_time('timestamp') - strtotime($comment->comment_date);
+        if ($time_difference <= 86400) { // 86400 seconds = 24 hours
+            $recent_comment_by_author = true;
+            break;
         }
     }
 }
 
-function followup_activation() {
-    if (!wp_next_scheduled('check_for_responses')) {
-        wp_schedule_event(time(), 'daily', 'check_for_responses');
+if ($recent_comment_by_author) {
+    error_log("Recent Deshi check-in found");
+    error_log("Time of the most recent Deshi comment: " . $most_recent_deshi_comment_time);
+} else {
+    error_log("Recent Deshi check-in not found");
+    if ($most_recent_deshi_comment_time) {
+        error_log("Time of the most recent Deshi comment: " . $most_recent_deshi_comment_time);
+    } else {
+        error_log("No comments found from the Deshi");
     }
 }
-
-function followup_deactivation() {
-    wp_clear_scheduled_hook('check_for_responses');
-}
-
-function setup_followup_hooks($main_file) {
-    register_activation_hook($main_file, 'followup_activation');
-    register_deactivation_hook($main_file, 'followup_deactivation');
-}
-
-add_action('check_for_responses', 'check_for_responses');
+?>
