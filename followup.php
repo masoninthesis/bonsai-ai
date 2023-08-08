@@ -31,8 +31,9 @@ foreach ($posts as $post) {
     // Get the comments for the current post
     $comments = get_comments(array('post_id' => $post->ID));
 
-    // Get the post author ID
+    // Get the post author ID and email
     $post_author_id = $post->post_author;
+    $post_author_email = get_the_author_meta('user_email', $post_author_id);
 
     $recent_comment_by_author = false;
     $most_recent_deshi_comment_time = null;
@@ -75,7 +76,7 @@ foreach ($posts as $post) {
                 '1' => $response,
                 '4' => strval($post->ID),
                 '5' => $current_user->user_login,
-                '6' => $user_email,
+                '6' => $post_author_email,  // Set to the post author's email
             );
 
             $entry_id = GFAPI::add_entry($entry);
@@ -93,6 +94,9 @@ foreach ($posts as $post) {
                 foreach ($feeds as $feed) {
                     $openai_instance->process_feed($feed, $entry, $form);
                 }
+
+                // Send notifications for the form entry
+                GFAPI::send_notifications( $form, $entry );
             }
         } else {
             error_log("Recent Deshi check-in not found for post ID: " . $post->ID);
