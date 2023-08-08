@@ -2,9 +2,9 @@
 /**
  * Plugin Name: Bonsai AI
  * Description: A WordPress plugin that adds AI functionalities such as Sensei AI, and SenseiOS
- * Version: 0.0.1-alpha-0.38
+ * Version: 0.0.1-alpha-0.39
  * Author: Jackalope Labs
- * Author URI: https:/bonsai.so/
+ * Author URI: https://bonsai.so/
  */
 
 // Exit if accessed directly.
@@ -22,19 +22,44 @@ if ( ! defined( 'BONSAI_AI_PLUGIN_FILE' ) ) {
 	define( 'BONSAI_AI_PLUGIN_FILE', __FILE__ );
 }
 
-// Include the files.
+// Include the files
+// Merge tags for Gravity Forms
 require_once plugin_dir_path( BONSAI_AI_PLUGIN_FILE ) . 'merge-tags.php';
+
+// Journal prompts functionality
 require_once plugin_dir_path( BONSAI_AI_PLUGIN_FILE ) . 'journal-prompts.php';
+
+// Journal entries functionality
 require_once plugin_dir_path(__FILE__) . 'journal-entries.php';
+
+// Ask Sensei functionality
 require_once plugin_dir_path(__FILE__) . 'ask-sensei.php';
+
+// Chat functionality
 require_once plugin_dir_path(__FILE__) . 'chat.php';
+
+// Filters for various functionalities
 require_once plugin_dir_path(__FILE__) . 'filters.php';
-// require_once plugin_dir_path(__FILE__) . 'followup.php';
+
+// Deshi user functionality
+require_once plugin_dir_path(__FILE__) . 'deshi.php';
+
+// Set goal functionality
 require_once plugin_dir_path( __FILE__ ) . 'set-goal.php';
+
+// Goal check-in functionality
 require_once plugin_dir_path( __FILE__ ) . 'goal-checkin.php';
+
+// Sensei functionality
 require_once plugin_dir_path( __FILE__ ) . 'sensei.php';
+
+// Subscribe functionality
 require_once plugin_dir_path( __FILE__ ) . 'subscribe.php';
+
+// Directives functionality
 require_once plugin_dir_path( __FILE__ ) . 'directives.php';
+
+// Daily check-ins functionality
 require_once plugin_dir_path( __FILE__ ) . 'daily-checkins.php';
 
 // Sensei Upgrade: Sensei upgrade password field is hidden if deshi user is already logged in
