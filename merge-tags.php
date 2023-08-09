@@ -225,3 +225,28 @@ function username_replace_merge_tags( $text, $form, $entry, $url_encode, $esc_ht
 
     return $text;
 }
+
+// Current post author username merge tag
+// Register custom merge tags
+add_filter('gform_custom_merge_tags', 'register_author_username_merge_tag', 10, 4);
+function register_author_username_merge_tag($merge_tags, $form_id, $fields, $element_id) {
+    $merge_tags[] = array(
+        'label' => 'Author Username',
+        'tag'   => '{author_username}'
+    );
+
+    return $merge_tags;
+}
+
+// Replace custom merge tags
+add_filter('gform_replace_merge_tags', 'replace_author_username_merge_tag', 10, 7);
+function replace_author_username_merge_tag($text, $form, $entry, $url_encode, $esc_html, $nl2br, $format) {
+    $post_author_username = '';
+
+    if ( is_singular() ) {
+        $author_id = get_post_field('post_author', get_the_ID());
+        $post_author_username = get_the_author_meta('user_login', $author_id);
+    }
+
+    return str_replace('{author_username}', $post_author_username, $text);
+}
