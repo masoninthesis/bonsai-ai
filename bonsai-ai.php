@@ -47,6 +47,9 @@ require_once plugin_dir_path(__FILE__) . 'deshi.php';
 // Set goal functionality
 require_once plugin_dir_path( __FILE__ ) . 'set-goal.php';
 
+// Set goal functionality
+require_once plugin_dir_path( __FILE__ ) . 'login.php';
+
 // Goal check-in functionality
 require_once plugin_dir_path( __FILE__ ) . 'goal-checkin.php';
 
