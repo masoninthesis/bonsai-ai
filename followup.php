@@ -34,6 +34,7 @@ foreach ($posts as $post) {
     // Get the post author ID and email
     $post_author_id = $post->post_author;
     $post_author_email = get_the_author_meta('user_email', $post_author_id);
+    $post_author_username = get_the_author_meta('user_login', $post_author_id);
 
     $recent_comment_by_author = false;
     $most_recent_deshi_comment_time = null;
@@ -75,7 +76,7 @@ foreach ($posts as $post) {
                 'status' => 'active',
                 '1' => $response,
                 '4' => strval($post->ID),
-                '5' => $current_user->user_login,
+                '5' => $post_author_username, // Use the post author's username
                 '6' => $post_author_email,  // Set to the post author's email
             );
 
@@ -96,7 +97,7 @@ foreach ($posts as $post) {
                 }
 
                 // Send notifications for the form entry
-                GFAPI::send_notifications( $form, $entry );
+                GFAPI::send_notifications($form, $entry);
             }
         } else {
             error_log("Recent Deshi check-in not found for post ID: " . $post->ID);
