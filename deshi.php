@@ -1,7 +1,7 @@
 <?php
 // Post creation and redirect for Deshi Signup
-
-add_action( 'gform_after_submission_31', 'create_deshi_and_redirect', 10, 2 );
+// Deshi Account Creation
+add_action( 'gform_after_submission_34', 'create_deshi_and_redirect', 10, 2 );
 function create_deshi_and_redirect( $entry, $form ) {
 
     $username = rgar( $entry, '1' );
@@ -24,7 +24,7 @@ function create_deshi_and_redirect( $entry, $form ) {
     $user = new WP_User($user_id);
 
     // Add 'deshi' role to the user
-    $user->add_role('deshi');
+    $user->add_role('subscriber');
 
     // Check if user was created successfully
     if ( ! is_wp_error( $user_id ) ) {
