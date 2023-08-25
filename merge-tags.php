@@ -252,8 +252,8 @@ function replace_author_username_merge_tag($text, $form, $entry, $url_encode, $e
 }
 
 // Custom merge tag for site URL
-add_filter('gform_custom_merge_tags', 'custom_merge_tags');
-function custom_merge_tags($merge_tags) {
+add_filter('gform_custom_merge_tags', 'get_site_url');
+function get_site_url($merge_tags) {
     $merge_tags[] = array(
         'label' => 'Site URL',
         'tag' => '{site_url}',
