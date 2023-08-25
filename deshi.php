@@ -203,3 +203,9 @@ function deshios_shortcode($atts) {
 }
 
 add_shortcode('deshios', 'deshios_shortcode');
+
+// Shortcode for Deshi Web3 redirect URL
+function site_url_shortcode() {
+    return site_url();
+}
+add_shortcode('siteurl', 'site_url_shortcode');
