@@ -1,6 +1,6 @@
 <?php
 // This file handles functionality related to chat system
-// Ask Sensei Form
+
 // Post Creation
 add_action('gform_after_submission_32', 'create_smart_goal', 10, 2);
 
@@ -36,25 +36,3 @@ function create_smart_goal($entry, $form) {
         exit;
     }
 }
-
-// Redirect to newly created ask-sensei post
-// add_filter( 'gform_confirmation_32', 'custom_confirmation_32', 10, 4 );
-//
-// function custom_confirmation_32( $confirmation, $form, $entry, $ajax ) {
-//     if ( $form['id'] != 32 ) {
-//         return $confirmation;
-//     }
-//
-//     $post_id = gform_get_meta($entry['id'], 'new_post_id');
-//
-//     if ( ! $post_id ) {
-//         return $confirmation;
-//     }
-//
-//     $redirect_url = get_permalink( $post_id );
-//     if ( $redirect_url ) {
-//         $confirmation = array( 'redirect' => $redirect_url );
-//     }
-//
-//     return $confirmation;
-// }

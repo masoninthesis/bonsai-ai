@@ -250,3 +250,28 @@ function replace_author_username_merge_tag($text, $form, $entry, $url_encode, $e
 
     return str_replace('{author_username}', $post_author_username, $text);
 }
+
+// User role merge tag
+add_filter( 'gform_replace_merge_tags', 'replace_user_roles_merge_tag', 10, 7 );
+
+function replace_user_roles_merge_tag( $text, $form, $entry, $url_encode, $esc_html, $nl2br, $format ) {
+    // Define the custom merge tag to look for
+    $custom_merge_tag = '{user_roles}';
+
+    // Check if our custom merge tag is used in the text
+    if ( strpos( $text, $custom_merge_tag ) === false ) {
+        return $text;
+    }
+
+    // Get the current user's data
+    $current_user = wp_get_current_user();
+    if ( empty( $current_user->roles ) ) {
+        return str_replace( $custom_merge_tag, 'No roles found', $text );
+    }
+
+    // Convert the roles array to a comma-separated string
+    $roles_str = implode( ', ', $current_user->roles );
+
+    // Replace the custom merge tag with the roles string
+    return str_replace( $custom_merge_tag, $roles_str, $text );
+}
