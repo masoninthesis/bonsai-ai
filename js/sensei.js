@@ -3,19 +3,33 @@ jQuery(document).ready(function($) {
     $('#input_25_3').hide();
 });
 
-// Not working– Loading animation modal triggers on form submissions (Duplicated in theme's common.js)
-// jQuery(document).ready(function($) {
-//     // Select forms 32 and 33
-//     $('#gform_22, #gform_23, #gform_32, #gform_33').on('submit', function(event) {
-//         // Prevent the form from submitting immediately
-//         event.preventDefault();
-//
-//         // Show the modal
-//         $('#loadingModal').modal('show');
-//
-//         // Submit the form after a delay to allow the modal to show
-//         setTimeout(() => {
-//             event.target.submit();
-//         }, 500);  // Delay in milliseconds
-//     });
-// });
+// Private vs Public Goals Toggle
+/* global myLocalizedVars */
+
+jQuery(document).ready(function($) {
+    // Initialize toggle status text based on checkbox state
+    $('#private-toggle').is(':checked') ? $('#toggle-status').text('Private') : $('#toggle-status').text('Public');
+
+    // Listen for toggle changes
+    $('#private-toggle').on('change', function() {
+        var postID = $(this).data('post-id');
+        var newStatus = $(this).is(':checked') ? 'private' : 'publish';
+
+        // Update the status text
+        newStatus === 'private' ? $('#toggle-status').text('Private') : $('#toggle-status').text('Public');
+
+        $.ajax({
+            url: myLocalizedVars.ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'toggle_post_status',
+                post_id: postID,
+                new_status: newStatus,
+                security: myLocalizedVars.security
+            },
+            success: function(response) {
+                console.log('Post status updated:', response);
+            }
+        });
+    });
+});
