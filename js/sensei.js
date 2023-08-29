@@ -33,11 +33,3 @@ jQuery(document).ready(function($) {
         });
     });
 });
-
-// Deshi pricing boxes selects product dropdown by value
-jQuery(document).ready(function() {
-    jQuery('.card').on('click', function() {
-        var selectedTier = jQuery(this).data('tier');
-        jQuery('#input_31_4').val(selectedTier);
-    });
-});
