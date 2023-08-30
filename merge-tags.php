@@ -275,3 +275,36 @@ function replace_user_roles_merge_tag( $text, $form, $entry, $url_encode, $esc_h
     // Replace the custom merge tag with the roles string
     return str_replace( $custom_merge_tag, $roles_str, $text );
 }
+
+// Latest goal post URL merge tag
+// Register custom merge tag for latest goal URL
+// add_filter('gform_custom_merge_tags', 'add_latest_goal_url_merge_tag', 10, 4);
+// function add_latest_goal_url_merge_tag($merge_tags, $form_id, $fields, $element_id) {
+//     $merge_tags[] = array(
+//         'label' => 'Latest Goal URL',
+//         'tag' => '{latest_goal_url}'
+//     );
+//     return $merge_tags;
+// }
+
+// // Replace merge tag value for latest goal URL
+// add_filter('gform_replace_merge_tags', 'replace_latest_goal_url_merge_tag', 10, 7);
+// function replace_latest_goal_url_merge_tag($text, $form, $entry, $url_encode, $esc_html, $nl2br, $format) {
+//     if (strpos($text, '{latest_goal_url}') !== false) {
+//         $args = array(
+//             'post_type' => 'post',
+//             'post_status' => 'publish',
+//             'category_name' => 'goals-journal-entries',
+//             'author' => get_current_user_id(),
+//             'posts_per_page' => 1,
+//             'orderby' => 'date',
+//             'order' => 'DESC'
+//         );
+//         $latest_post = get_posts($args);
+//         if ($latest_post) {
+//             $post_url = get_permalink($latest_post[0]->ID);
+//             $text = str_replace('{latest_goal_url}', $post_url, $text);
+//         }
+//     }
+//     return $text;
+// }
