@@ -78,6 +78,7 @@ foreach ($posts as $post) {
                 '4' => strval($post->ID),
                 '5' => $post_author_username, // Use the post author's username
                 '6' => $post_author_email,  // Set to the post author's email
+                'created_by' => $post_author_id  // Set the post author ID here
             );
 
             $entry_id = GFAPI::add_entry($entry);

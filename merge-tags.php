@@ -308,3 +308,33 @@ function replace_latest_goal_url_merge_tag($text, $form, $entry, $url_encode, $e
     }
     return $text;
 }
+
+// Deshi Profile URL merge tag
+// Register custom merge tag for Deshi Profile URL
+add_filter('gform_custom_merge_tags', 'add_deshi_profile_url_merge_tag', 10, 4);
+function add_deshi_profile_url_merge_tag($merge_tags, $form_id, $fields, $element_id) {
+    $merge_tags[] = array(
+        'label' => 'Deshi Profile URL',
+        'tag' => '{deshi_profile_url}'
+    );
+    return $merge_tags;
+}
+
+// Replace merge tag value for Deshi Profile URL
+add_filter('gform_replace_merge_tags', 'replace_deshi_profile_url_merge_tag', 10, 7);
+function replace_deshi_profile_url_merge_tag($text, $form, $entry, $url_encode, $esc_html, $nl2br, $format) {
+    if (strpos($text, '{deshi_profile_url}') !== false) {
+        $user_id = rgar($entry, 'created_by');
+        $user_info = get_userdata($user_id);
+        $username = $user_info->user_login;
+
+        // Construct the profile URL
+        $profile_url = site_url() . "/deshi/" . $username;
+
+        // Remove /wp/ from the URL
+        $profile_url = str_replace('/wp/', '/', $profile_url);
+
+        $text = str_replace('{deshi_profile_url}', $profile_url, $text);
+    }
+    return $text;
+}
