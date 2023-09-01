@@ -61,3 +61,22 @@ function toggle_post_status() {
     wp_send_json_success(array('status' => $new_status, 'updated' => $updated));
 }
 add_action('wp_ajax_toggle_post_status', 'toggle_post_status');
+
+// Add acountability partner email to goal post's metadata
+add_action('gform_after_submission_38', 'save_accountability_partner', 10, 2);
+function save_accountability_partner($entry, $form) {
+    // Get the post ID from the form entry
+    $post_id = rgar($entry, '4');
+
+    // Get the accountability partner email and optional first name
+    $accountability_partner_email = rgar($entry, '1');
+    $accountability_partner_name = rgar($entry, '3');
+
+    // Update the post metadata for the accountability partner email
+    update_post_meta($post_id, 'accountability_partner_email', $accountability_partner_email);
+
+    // Check if the optional first name is provided and update the post metadata
+    if (!empty($accountability_partner_name)) {
+        update_post_meta($post_id, 'accountability_partner_name', $accountability_partner_name);
+    }
+}

@@ -338,3 +338,40 @@ function replace_deshi_profile_url_merge_tag($text, $form, $entry, $url_encode, 
     }
     return $text;
 }
+
+// Goal Accountability Partner Email and Name Merge Tags
+add_filter('gform_replace_merge_tags', function($text, $form, $entry, $url_encode, $esc_html, $nl2br, $format) {
+
+    // The post ID is stored in field 4 in the form #33 entry
+    $post_id = rgar($entry, '4');
+
+    // Fetch the stored metadata values for the accountability partner
+    $email = get_post_meta($post_id, 'accountability_partner_email', true);
+    $name = get_post_meta($post_id, 'accountability_partner_name', true);
+
+    // Replace the merge tags in the notification text
+    $text = str_replace('{accountability_partner_email}', $email, $text);
+    $text = str_replace('{accountability_partner_name}', $name, $text);
+
+    return $text;
+
+}, 10, 7);
+
+// Goal checkin author email
+add_filter('gform_replace_merge_tags', function($text, $form, $entry, $url_encode, $esc_html, $nl2br, $format) {
+
+    // The post ID is stored in field 4 in the form #33 entry
+    $post_id = rgar($entry, '4');
+
+    // Fetch the post author ID
+    $post_author_id = get_post_field('post_author', $post_id);
+
+    // Get the author's email
+    $author_email = get_the_author_meta('user_email', $post_author_id);
+
+    // Replace the merge tag in the notification text
+    $text = str_replace('{author_email}', $author_email, $text);
+
+    return $text;
+
+}, 10, 7);
