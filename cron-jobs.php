@@ -1,11 +1,13 @@
 <?php
 // Runs autoresponse check daily
-add_action('init', 'schedule_deshi_autoresponse_cron');
 function schedule_deshi_autoresponse_cron() {
-    // Check if the event is already scheduled
-    if (!wp_next_scheduled('deshi_autoresponse_event')) {
-        // Schedule the event to run daily
-        wp_schedule_event(time(), 'daily', 'deshi_autoresponse_event');
+    // Check if the environment is production
+    if (defined('WP_ENV') && WP_ENV === 'production') {
+        // Check if the event is already scheduled
+        if (!wp_next_scheduled('deshi_autoresponse_event')) {
+            // Schedule the event to run daily
+            wp_schedule_event(time(), 'daily', 'deshi_autoresponse_event');
+        }
     }
 }
 
