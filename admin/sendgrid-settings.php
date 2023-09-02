@@ -110,3 +110,105 @@ add_action('user_register', function($user_id) {
 add_action('set_user_role', function($user_id, $role, $old_roles) {
     handle_sendgrid_wp($user_id, $role);
 }, 10, 3);
+
+// Add waitlist signup to Sendgrid contacts and waitlist list
+add_action('gform_after_submission', 'add_sendgrid_contact_via_gform', 10, 2);
+function add_sendgrid_contact_via_gform($entry, $form) {
+    // Only proceed if the form ID is 7
+    if ($form['id'] != 7) {
+        return;
+    }
+
+    // Fetch the email field from the form entry, assumed to be field ID 1
+    $email = rgar($entry, '1');
+
+    // Initialize SendGrid API key from WordPress options
+    $sendgridAPIKey = get_option('bonsai_ai_sendgrid_api_key');
+
+    // Initialize cURL
+    $curl = curl_init();
+
+    curl_setopt_array($curl, [
+        CURLOPT_URL => "https://api.sendgrid.com/v3/marketing/contacts",
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST => "PUT",
+        CURLOPT_POSTFIELDS => json_encode([
+            'list_ids' => ['8b0f4ea5-f433-480b-8ce3-67b664f8352b'],
+            'contacts' => [
+                [
+                    'email' => $email,
+                    'custom_fields' => [
+                        'w1_T' => 'waitlist'
+                    ]
+                ]
+            ]
+        ]),
+        CURLOPT_HTTPHEADER => [
+            "authorization: Bearer $sendgridAPIKey",
+            "content-type: application/json"
+        ],
+    ]);
+
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+
+    curl_close($curl);
+
+    if ($err) {
+        error_log("cURL Error #:" . $err);
+    } else {
+        error_log("SendGrid Response: $response");
+    }
+}
+
+// Add Accountability Partner to SendGrid list when a Gravity Forms form is submitted
+add_action('gform_after_submission', 'add_accountability_partner_via_gform', 10, 2);
+function add_accountability_partner_via_gform($entry, $form) {
+    // Only proceed if the form ID is 38
+    if ($form['id'] != 38) {
+        return;
+    }
+
+    // Fetch the email and username fields from the form entry
+    $email = rgar($entry, '1');
+    $username = rgar($entry, '3');
+
+    // Initialize SendGrid API key from WordPress options
+    $sendgridAPIKey = get_option('bonsai_ai_sendgrid_api_key');
+
+    // Initialize cURL
+    $curl = curl_init();
+
+    curl_setopt_array($curl, [
+        CURLOPT_URL => "https://api.sendgrid.com/v3/marketing/contacts",
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST => "PUT",
+        CURLOPT_POSTFIELDS => json_encode([
+            'list_ids' => ['cff9087c-fc83-4f1e-be57-fa4518ce5a2f'],
+            'contacts' => [
+                [
+                    'email' => $email,
+                    'custom_fields' => [
+                        'w1_T' => 'Accountability Partner',
+                        'w2_T' => $username
+                    ]
+                ]
+            ]
+        ]),
+        CURLOPT_HTTPHEADER => [
+            "authorization: Bearer $sendgridAPIKey",
+            "content-type: application/json"
+        ],
+    ]);
+
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+
+    curl_close($curl);
+
+    if ($err) {
+        error_log("cURL Error #:" . $err);
+    } else {
+        error_log("SendGrid Response: $response");
+    }
+}
