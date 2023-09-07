@@ -13,6 +13,11 @@ $args = array(
         'after' => date('Y-m-d', strtotime('-7 days'))
     )
 );
+
+if (defined('AUTO_RESPONSE_USER_ID')) {
+    $args['author'] = AUTO_RESPONSE_USER_ID;
+}
+
 $posts = get_posts($args);
 
 error_log('Total posts fetched from the last 7 days: ' . count($posts));
@@ -26,6 +31,12 @@ $form_id = 33;  // Set the form ID
 $openai_instance = GWiz_GF_OpenAI::get_instance();
 
 foreach ($posts as $post) {
+    $goal_status = get_post_meta($post->ID, 'goal_status', true);
+    if ($goal_status === 'Abandoned') {
+        error_log("Skipping abandoned goal for post ID: " . $post->ID);
+        continue; // Skip this iteration of the loop
+    }
+
     error_log('Processing post ID: ' . $post->ID . ' | Post date: ' . $post->post_date);
 
     // Get the comments for the current post

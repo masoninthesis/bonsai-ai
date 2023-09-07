@@ -63,6 +63,63 @@ function gf_openai_checkins($post_id, $username, $deshi_comment, $sensei_comment
     $sensei_comment_id = wp_insert_comment($sensei_data);
 }
 
+// Update the goal status
+function update_goal_status($post_id, $status) {
+    if (update_post_meta($post_id, 'goal_status', $status)) {
+        error_log("Successfully updated the goal status to " . $status);
+    } else {
+        error_log("Failed to update the goal status.");
+    }
+}
+
+// Add this new function near the end of the file
+function update_goal_status_api($request) {
+  $post_id = $request['id'];
+  $status = $request['status'];
+  $responseMessage = '';
+
+  if ($status === 'Abandon') {
+    update_post_meta($post_id, 'goal_status', 'Abandoned');
+    $responseMessage = 'Goal status updated to Abandoned';
+  } elseif ($status === 'Reactivate') {
+    update_post_meta($post_id, 'goal_status', 'Active');
+    $responseMessage = 'Goal status updated to Reactivated';
+  }
+
+  if (!empty($responseMessage)) {
+    return new WP_REST_Response(array('message' => $responseMessage), 200);
+  } else {
+    return new WP_REST_Response(array('message' => 'Invalid status'), 400);
+  }
+}
+
+// Register the REST API route
+add_action('rest_api_init', function () {
+    register_rest_route('bonsai/v1', '/update_goal_status', array(
+        'methods' => 'POST',
+        'callback' => 'update_goal_status_api',
+    ));
+});
+
+// New function to handle the API request for getting the goal status
+function get_goal_status_api($request) {
+    $post_id = $request['id'];
+    $status = get_post_meta($post_id, 'goal_status', true);
+
+    if (!empty($status)) {
+        return new WP_REST_Response(array('status' => $status), 200);
+    } else {
+        return new WP_REST_Response(array('status' => 'Not set'), 200);
+    }
+}
+
+// Register the new route
+add_action('rest_api_init', function () {
+    register_rest_route('bonsai/v1', '/get_goal_status', array(
+        'methods' => 'GET',
+        'callback' => 'get_goal_status_api',
+    ));
+});
 
 // comment fomatting
 add_filter('gform_save_field_value', 'preserve_line_breaks_in_multiline_text', 10, 5);

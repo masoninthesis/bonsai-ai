@@ -375,3 +375,30 @@ add_filter('gform_replace_merge_tags', function($text, $form, $entry, $url_encod
     return $text;
 
 }, 10, 7);
+
+// Abandon Goal URL Merge Tag
+// add_filter('gform_custom_merge_tags', 'add_abandon_goal_merge_tag', 10, 4);
+//
+// function add_abandon_goal_merge_tag($merge_tags, $form_id, $fields, $element_id) {
+//     if ($form_id == 33) {
+//         $merge_tags[] = array(
+//             'label' => 'Abandon Goal URL',
+//             'tag'   => '{abandon_goal_url}'
+//         );
+//     }
+//
+//     return $merge_tags;
+// }
+//
+// add_filter('gform_replace_merge_tags', 'replace_abandon_goal_merge_tag', 10, 7);
+//
+// function replace_abandon_goal_merge_tag($text, $form, $entry, $url_encode, $esc_html, $nl2br, $format) {
+//     $post_id = rgar($entry, '4');  // Replace '4' with the field ID that stores the post ID
+//     $user_id = rgar($entry, 'created_by'); // The user who created this entry
+//     $secret_key = 'your_secret_key_here';
+//
+//     $token = hash_hmac('sha256', $user_id . '|' . $post_id, $secret_key);
+//     $abandon_url = home_url("/abandon-goal?token=$token&post_id=$post_id");
+//
+//     return str_replace('{abandon_goal_url}', $abandon_url, $text);
+// }
