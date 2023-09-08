@@ -61,6 +61,21 @@ function handle_sendgrid_wp($user_id, $role) {
     // Initialize SendGrid API key
     $sendgridAPIKey = get_option('bonsai_ai_sendgrid_api_key');
 
+    // Log payload for debugging
+    $payload = json_encode([
+        'list_ids' => [],
+        'contacts' => [
+            [
+                'email' => $email,
+                'custom_fields' => [
+                    'w1_T' => $role,
+                    'w2_T' => $username
+                ]
+            ]
+        ]
+    ]);
+    error_log("Sending Payload to SendGrid: " . $payload);
+
     // Using cURL to send the API request
     $curl = curl_init();
 
@@ -68,18 +83,7 @@ function handle_sendgrid_wp($user_id, $role) {
         CURLOPT_URL => "https://api.sendgrid.com/v3/marketing/contacts",
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST => "PUT",
-        CURLOPT_POSTFIELDS => json_encode([
-            'list_ids' => [],
-            'contacts' => [
-                [
-                    'email' => $email,
-                    'custom_fields' => [
-                        'w1_T' => $role,
-                        'w2_T' => $username
-                    ]
-                ]
-            ]
-        ]),
+        CURLOPT_POSTFIELDS => $payload,
         CURLOPT_HTTPHEADER => [
             "authorization: Bearer $sendgridAPIKey",
             "content-type: application/json"
@@ -91,10 +95,11 @@ function handle_sendgrid_wp($user_id, $role) {
 
     curl_close($curl);
 
+    // Log response for debugging
     if ($err) {
         error_log("cURL Error #:" . $err);
     } else {
-        error_log("SendGrid Response: $response");
+        error_log("SendGrid Response: " . $response);
     }
 }
 
@@ -107,9 +112,21 @@ add_action('user_register', function($user_id) {
 });
 
 // Update user role in Sendgrid contacts
+// For programmatic role changes
 add_action('set_user_role', function($user_id, $role, $old_roles) {
+    error_log("set_user_role action triggered. New role: $role, Old role(s): " . implode(", ", $old_roles));
     handle_sendgrid_wp($user_id, $role);
-}, 10, 3);
+}, 1, 3);
+
+// For role changes made via the WordPress admin
+add_action('updated_user_meta', function($meta_id, $user_id, $meta_key, $_meta_value) {
+    if ('wp_capabilities' === $meta_key) {
+        $user_info = get_userdata($user_id);
+        $role = $user_info->roles[0];  // This should now have the updated role
+        error_log("updated_user_meta action triggered. Updated role: $role");
+        handle_sendgrid_wp($user_id, $role);
+    }
+}, 10, 4);
 
 // Add waitlist signup to Sendgrid contacts and waitlist list
 add_action('gform_after_submission', 'add_sendgrid_contact_via_gform', 10, 2);
