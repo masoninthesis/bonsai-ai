@@ -52,38 +52,26 @@ function bonsai_ai_sendgrid_api_key_cb() {
     echo "<input type='text' name='bonsai_ai_sendgrid_api_key' value='$api_key'>";
 }
 
-// Function to handle the common logic between creating and updating a user
-function handle_sendgrid_wp($user_id, $role) {
-    $user_info = get_userdata($user_id);
-    $email = $user_info->user_email;
-    $username = $user_info->user_login;
+// Assign users to lists based on role
+$role_to_list_id_mapping = [
+    'subscriber' => 'b4fd5719-20e6-41b5-a5a5-db350e61d96d',
+    'pre_deshi'  => '17a852c3-7ab8-4384-a79c-a0d7ceefffa3',
+    'deshi'      => '08b7e55b-8e11-4c10-a5fc-803b56d528ae',
+    'sensei'     => '5af1f435-fc13-44ce-9731-f412f2b1ac5e',
+    // Add more roles and their corresponding SendGrid list IDs
+];
 
-    // Initialize SendGrid API key
-    $sendgridAPIKey = get_option('bonsai_ai_sendgrid_api_key');
-
-    // Log payload for debugging
-    $payload = json_encode([
-        'list_ids' => [],
-        'contacts' => [
-            [
-                'email' => $email,
-                'custom_fields' => [
-                    'w1_T' => $role,
-                    'w2_T' => $username
-                ]
-            ]
-        ]
-    ]);
-    error_log("Sending Payload to SendGrid: " . $payload);
-
-    // Using cURL to send the API request
+function get_sendgrid_contact_id($email, $sendgridAPIKey) {
+    // Initialize cURL
     $curl = curl_init();
 
     curl_setopt_array($curl, [
-        CURLOPT_URL => "https://api.sendgrid.com/v3/marketing/contacts",
+        CURLOPT_URL => "https://api.sendgrid.com/v3/marketing/contacts/search",
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_CUSTOMREQUEST => "PUT",
-        CURLOPT_POSTFIELDS => $payload,
+        CURLOPT_CUSTOMREQUEST => "POST",
+        CURLOPT_POSTFIELDS => json_encode([
+            'query' => "email LIKE '$email'"
+        ]),
         CURLOPT_HTTPHEADER => [
             "authorization: Bearer $sendgridAPIKey",
             "content-type: application/json"
@@ -95,11 +83,113 @@ function handle_sendgrid_wp($user_id, $role) {
 
     curl_close($curl);
 
-    // Log response for debugging
+    if ($err) {
+        error_log("cURL Error while fetching contact ID: " . $err);
+        return null;
+    }
+
+    $response_data = json_decode($response, true);
+
+    if (isset($response_data['result'][0]['id'])) {
+        return $response_data['result'][0]['id'];
+    }
+
+    return null;
+}
+
+// New function to remove a user from an old SendGrid list
+function remove_user_from_sendgrid_list($email, $old_list_id, $sendgridAPIKey) {
+    $contact_id = get_sendgrid_contact_id($email, $sendgridAPIKey);
+
+    if (!$contact_id) {
+        error_log("Could not find SendGrid contact ID for email $email");
+        return;
+    }
+
+    error_log("Attempting to remove contact ID $contact_id from list ID $old_list_id");
+
+    // Initialize cURL
+    $curl = curl_init();
+
+    $url = "https://api.sendgrid.com/v3/marketing/lists/$old_list_id/contacts?contact_ids=$contact_id";
+
+    curl_setopt_array($curl, [
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST => "DELETE",
+        CURLOPT_HTTPHEADER => [
+            "authorization: Bearer $sendgridAPIKey",
+            "content-type: application/json"
+        ],
+    ]);
+
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+
+    curl_close($curl);
+
+    if ($err) {
+        error_log("cURL Error while removing from list: " . $err);
+    } else {
+        error_log("Removed from list. SendGrid Response: $response");
+    }
+}
+
+// Function to handle the common logic between creating and updating a user
+function handle_sendgrid_wp($user_id, $role, $old_role = null) {
+    $user_info = get_userdata($user_id);
+    $email = $user_info->user_email;
+    $username = $user_info->user_login;
+
+    // Initialize SendGrid API key
+    $sendgridAPIKey = get_option('bonsai_ai_sendgrid_api_key');
+
+    global $role_to_list_id_mapping;
+
+    // Determine the old and new SendGrid list IDs based on roles
+    $list_id = isset($role_to_list_id_mapping[$role]) ? $role_to_list_id_mapping[$role] : 'default_list_id';
+    $old_list_id = $old_role && isset($role_to_list_id_mapping[$old_role]) ? $role_to_list_id_mapping[$old_role] : null;
+
+    // Log and remove user from old list if applicable
+    if ($old_list_id) {
+        error_log("Old List ID: $old_list_id");
+        remove_user_from_sendgrid_list($email, $old_list_id, $sendgridAPIKey);
+    }
+
+    // Using cURL to send the API request
+    $curl = curl_init();
+
+    curl_setopt_array($curl, [
+        CURLOPT_URL => "https://api.sendgrid.com/v3/marketing/contacts",
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST => "PUT",
+        CURLOPT_POSTFIELDS => json_encode([
+            'list_ids' => [$list_id],  // Use the looked-up list ID here
+            'contacts' => [
+                [
+                    'email' => $email,
+                    'custom_fields' => [
+                        'w1_T' => $role,
+                        'w2_T' => $username
+                    ]
+                ]
+            ]
+        ]),
+        CURLOPT_HTTPHEADER => [
+            "authorization: Bearer $sendgridAPIKey",
+            "content-type: application/json"
+        ],
+    ]);
+
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+
+    curl_close($curl);
+
     if ($err) {
         error_log("cURL Error #:" . $err);
     } else {
-        error_log("SendGrid Response: " . $response);
+        error_log("SendGrid Response: $response");
     }
 }
 
@@ -114,19 +204,34 @@ add_action('user_register', function($user_id) {
 // Update user role in Sendgrid contacts
 // For programmatic role changes
 add_action('set_user_role', function($user_id, $role, $old_roles) {
-    error_log("set_user_role action triggered. New role: $role, Old role(s): " . implode(", ", $old_roles));
-    handle_sendgrid_wp($user_id, $role);
-}, 1, 3);
+    $old_role = !empty($old_roles) ? array_shift($old_roles) : null;
+    handle_sendgrid_wp($user_id, $role, $old_role);
+}, 10, 3);
+
+// Temporary storage for the old role
+$old_wp_role = null;
+
+// Capture the old role just before updating
+add_action('update_user_meta', function($meta_id, $user_id, $meta_key, $meta_value) {
+    global $old_wp_role;
+    if ('wp_capabilities' === $meta_key) {
+        $user_info = get_userdata($user_id);
+        $old_wp_role = isset($user_info->roles[0]) ? $user_info->roles[0] : null;
+    }
+}, 10, 4);
 
 // For role changes made via the WordPress admin
 add_action('updated_user_meta', function($meta_id, $user_id, $meta_key, $_meta_value) {
+    global $old_wp_role;
     if ('wp_capabilities' === $meta_key) {
         $user_info = get_userdata($user_id);
-        $role = $user_info->roles[0];  // This should now have the updated role
-        error_log("updated_user_meta action triggered. Updated role: $role");
-        handle_sendgrid_wp($user_id, $role);
+        $new_role = $user_info->roles[0];  // This should now have the updated role
+        error_log("updated_user_meta action triggered. Updated role: $new_role");
+        handle_sendgrid_wp($user_id, $new_role, $old_wp_role);
+        $old_wp_role = null;  // Reset the old role
     }
 }, 10, 4);
+
 
 // Add waitlist signup to Sendgrid contacts and waitlist list
 add_action('gform_after_submission', 'add_sendgrid_contact_via_gform', 10, 2);
