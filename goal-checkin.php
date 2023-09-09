@@ -98,6 +98,7 @@ add_action('rest_api_init', function () {
     register_rest_route('bonsai/v1', '/update_goal_status', array(
         'methods' => 'POST',
         'callback' => 'update_goal_status_api',
+        'permission_callback' => '__return_true'
     ));
 });
 
@@ -118,6 +119,7 @@ add_action('rest_api_init', function () {
     register_rest_route('bonsai/v1', '/get_goal_status', array(
         'methods' => 'GET',
         'callback' => 'get_goal_status_api',
+        'permission_callback' => '__return_true'
     ));
 });
 
