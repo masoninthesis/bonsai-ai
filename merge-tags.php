@@ -11,13 +11,35 @@ function replace_all_posts_merge_tag($text, $form, $entry, $url_encode, $esc_htm
         return $text;
     }
 
-    $sensei_id = get_user_meta(get_current_user_id(), 'sensei_id', true);
+    // Fetch the post author's ID for the current page
+    global $post;
+
+    if ( is_a( $post, 'WP_Post' ) ) {
+        $author_id = isset($post->post_author) ? $post->post_author : null;
+    } else {
+        $queried_object = get_queried_object();
+        if ( is_a( $queried_object, 'WP_Post' ) ) {
+            $author_id = isset($queried_object->post_author) ? $queried_object->post_author : null;
+        } else {
+            // Debugging line
+            error_log('Neither $post nor $queried_object is a WP_Post object');
+            // Fallback or exit if no author can be determined
+            return $text;
+        }
+    }
+
+    if ( $author_id === null ) {
+        // Debugging line
+        error_log('No author ID could be determined');
+        // Fallback or exit if no author can be determined
+        return $text;
+    }
 
     $args = array(
         'posts_per_page' => -1,
         'post_status' => 'publish',
         'category_name' => 'journal-entries',
-        'author' => $sensei_id,
+        'author' => $author_id,
     );
 
     $query = new WP_Query($args);
@@ -48,13 +70,35 @@ function replace_all_posts_excerpt_merge_tag($text, $form, $entry, $url_encode, 
         return $text;
     }
 
-    $sensei_id = get_user_meta(get_current_user_id(), 'sensei_id', true);
+    // Fetch the post author's ID for the current page
+    global $post;
+
+    if ( is_a( $post, 'WP_Post' ) ) {
+        $author_id = isset($post->post_author) ? $post->post_author : null;
+    } else {
+        $queried_object = get_queried_object();
+        if ( is_a( $queried_object, 'WP_Post' ) ) {
+            $author_id = isset($queried_object->post_author) ? $queried_object->post_author : null;
+        } else {
+            // Debugging line
+            error_log('Neither $post nor $queried_object is a WP_Post object');
+            // Fallback or exit if no author can be determined
+            return $text;
+        }
+    }
+
+    if ( $author_id === null ) {
+        // Debugging line
+        error_log('No author ID could be determined');
+        // Fallback or exit if no author can be determined
+        return $text;
+    }
 
     $args = array(
         'posts_per_page' => -1,
         'post_status' => 'publish',
         'category_name' => 'journal-entries',
-        'author' => $sensei_id,
+        'author' => $author_id,
     );
 
     $query = new WP_Query($args);
@@ -74,7 +118,6 @@ function replace_all_posts_excerpt_merge_tag($text, $form, $entry, $url_encode, 
 
     return str_replace($custom_merge_tag, $replace_text, $text);
 }
-
 
 // Populate posts merge tag
 function populate_posts_merge_tag($value, $field, $name, $lead, $form) {

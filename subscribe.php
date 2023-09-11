@@ -58,10 +58,10 @@ function subscribe_sensei($entry, $form) {
     //Get Sensei ID from field ID 7
     $sensei_id = rgar($entry, '7'); //Assuming field 7 is for sensei ID
 
-    //Update the user meta
+    // Update the user meta
     if($user_id && $sensei_id) {
         $current_sensei_ids = get_user_meta($user_id, 'sensei_ids', true);
-        $current_sensei_ids = $current_sensei_ids ? $current_sensei_ids : array();
+        $current_sensei_ids = is_array($current_sensei_ids) ? $current_sensei_ids : array(); // Explicit array check
 
         if(!in_array($sensei_id, $current_sensei_ids)) {
             $current_sensei_ids[] = $sensei_id;
