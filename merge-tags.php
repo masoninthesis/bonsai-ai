@@ -227,6 +227,23 @@ function replace_senseios_fields_merge_tag( $text, $form, $entry, $url_encode, $
 function display_senseios_fields() {
     $output = '';
 
+    // Get the current post ID
+    global $post;
+
+    // Check if $post is an object before trying to access its properties
+    if ( is_object($post) ) {
+        $post_id = $post->ID;
+
+        // Fetch the stored Sensei OS fields from the post metadata
+        $senseios_fields = get_post_meta($post_id, 'senseios_fields', true);
+
+        if ($senseios_fields) {
+            // If the metadata exists, use it
+            return $senseios_fields;
+        }
+    }
+
+    // Otherwise, fallback to your existing logic
     for($i = 1; $i <= 100; $i++) {
         $field_group = 'senseios_' . $i;
 

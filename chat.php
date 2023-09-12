@@ -1,4 +1,7 @@
 <?php
+// Include Parsedown class
+require_once 'vendor/autoload.php';
+
 // This file handles functionality related to chat system
 
 // This hook is triggered after Form #23 is submitted to create a comment for the post
@@ -8,13 +11,19 @@ function post_to_third_party($entry, $form)
     $post_id = $entry[4];
     $username = $entry[5];
     $deshi_comment = $entry[1];
-    $sensei_comment = $entry[3];
+    $sensei_comment = GFCommon::replace_variables('{openai_feed_37}', $form, $entry);  // Fetch the Sensei comment here
 
-    gf_openai_comments($post_id, $username, $deshi_comment, $sensei_comment);
+    gf_openai_comments($post_id, $username, $deshi_comment, $sensei_comment, $form, $entry);  // Pass all required variables
 }
 
-function gf_openai_comments($post_id, $username, $deshi_comment, $sensei_comment)
+function gf_openai_comments($post_id, $username, $deshi_comment, $sensei_comment, $form, $entry)
 {
+    // Initialize Parsedown
+    $parsedown = new Parsedown();
+
+    // Convert Markdown to HTML for the Sensei comment
+    $sensei_comment_html = $parsedown->text($sensei_comment);
+
     if (empty($post_id) || empty($username) || empty($deshi_comment) || empty($sensei_comment)) {
         error_log('GravityForms Comment Creation: Missing required data.');
         return;
@@ -50,7 +59,7 @@ function gf_openai_comments($post_id, $username, $deshi_comment, $sensei_comment
     // Define a new data array for the Sensei comment.
     $sensei_data = $data;
     $sensei_data['comment_author'] = 'Sensei';
-    $sensei_data['comment_content'] = $sensei_comment;
+    $sensei_data['comment_content'] = $sensei_comment_html;  // Use the HTML version here
     $sensei_data['comment_parent'] = $comment_id;
 
     $sensei_comment_id = wp_insert_comment($sensei_data);

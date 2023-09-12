@@ -49,6 +49,16 @@ class ComposerStaticInit0740430600599007531883a3f9c0e239
         ),
     );
 
+    public static $prefixesPsr0 = array (
+        'P' => 
+        array (
+            'Parsedown' => 
+            array (
+                0 => __DIR__ . '/..' . '/erusev/parsedown',
+            ),
+        ),
+    );
+
     public static $classMap = array (
         'BaseSendGridClientInterface' => __DIR__ . '/..' . '/sendgrid/sendgrid/lib/BaseSendGridClientInterface.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
@@ -61,6 +71,7 @@ class ComposerStaticInit0740430600599007531883a3f9c0e239
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit0740430600599007531883a3f9c0e239::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit0740430600599007531883a3f9c0e239::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit0740430600599007531883a3f9c0e239::$prefixesPsr0;
             $loader->classMap = ComposerStaticInit0740430600599007531883a3f9c0e239::$classMap;
 
         }, null, ClassLoader::class);
