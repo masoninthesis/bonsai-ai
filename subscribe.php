@@ -4,7 +4,10 @@
 // Create a sensei_id parameter for Gravity Forms to populate with
 add_filter('gform_field_value_sensei_id', function($value) {
     global $post;
-    return $post->post_author; // This assumes that the Sensei is the author of the post
+    if (is_object($post)) {
+        return $post->post_author;
+    }
+    return ''; // return an empty string if $post is not an object
 });
 
 // Store the Sensei ID in the user metadata

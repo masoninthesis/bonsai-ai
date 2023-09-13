@@ -34,7 +34,7 @@ function create_deshi_and_redirect( $entry, $form ) {
             'post_content'  => rgar( $entry, '1' ), // replace '1' with the ID of your Post Content field
             'post_status'   => 'publish',
             'post_author'   => $user_id,
-            'post_type'     => 'deshi' // change from 'post' to 'deshi'
+            'post_type'     => 'deshi'
         );
 
         // Insert the post and get the ID
