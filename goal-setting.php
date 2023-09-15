@@ -1,5 +1,5 @@
 <?php
-// Include Parsedown class if not already included
+// Include Parsedown class
 require_once 'vendor/autoload.php';
 
 // This file handles functionality related to chat system
@@ -17,10 +17,18 @@ function create_smart_goal($entry, $form) {
     // Initialize Parsedown
     $parsedown = new Parsedown();
 
+    // Define the OpenAI feed tag based on the form ID
+    $openai_feed_tag = '';
+    if ($form['id'] == 32) {
+        $openai_feed_tag = '{openai_feed_60}';
+    } elseif ($form['id'] == 40) {
+        $openai_feed_tag = '{openai_feed_87}';
+    }
+
     // Extract data from the form
     $post_title = rgar($entry, '1');
     $goal = rgar($entry, '1');
-    $response_raw = GFCommon::replace_variables('{openai_feed_60}', $form, $entry);
+    $response_raw = GFCommon::replace_variables($openai_feed_tag, $form, $entry);
     $response = $parsedown->text($response_raw);  // Markdown parsing
 
     // Construct the post content using the question and response
