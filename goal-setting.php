@@ -51,6 +51,17 @@ function create_smart_goal($entry, $form) {
     // Insert the post
     $post_id = wp_insert_post($post_data);
 
+    // Fetch the senseios_fields using the merge tag
+    $senseios_fields = GFCommon::replace_variables('{senseios_fields}', $form, $entry);
+
+    // Check the data type
+    if (is_array($senseios_fields)) {
+        $senseios_fields = json_encode($senseios_fields);
+    }
+
+    // Add the senseios_fields as a meta field to the post
+    add_post_meta($post_id, 'senseios_fields', $senseios_fields);
+
     // Redirect to the newly created post
     if ($post_id) {
         wp_redirect(get_permalink($post_id));
