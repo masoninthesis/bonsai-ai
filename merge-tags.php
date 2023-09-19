@@ -267,6 +267,60 @@ function display_senseios_fields() {
     return $output;
 }
 
+// Custom SenseiOS Merge Tag
+add_filter( 'gform_replace_merge_tags', 'replace_senseios_custom_merge_tag', 10, 7 );
+function replace_senseios_custom_merge_tag( $text, $form, $entry, $url_encode, $esc_html, $nl2br, $format ) {
+    $custom_merge_tag = '{senseios_custom}';
+
+    if ( strpos( $text, $custom_merge_tag ) === false ) {
+        return $text;
+    }
+
+    $senseios_custom_content = display_senseios_custom();
+
+    return str_replace( $custom_merge_tag, $senseios_custom_content, $text );
+}
+
+function display_senseios_custom() {
+    $output = '';
+
+    // Get the current post ID
+    global $post;
+
+    // Check if $post is an object before trying to access its properties
+    if ( is_object($post) ) {
+        $post_id = $post->ID;
+
+        // Fetch the specific Sensei OS custom field from the post metadata
+        $senseios_custom = get_post_meta($post_id, 'senseios_custom', true);
+
+        if ($senseios_custom) {
+            // If the metadata exists, use it
+            return $senseios_custom;
+        }
+    }
+
+    // Otherwise, fetch the custom field directly
+    if( have_rows('senseios_custom') ) {  // Replace 'senseios_custom' with the correct field name
+        while( have_rows('senseios_custom') ) {
+            the_row();
+
+            $title = get_sub_field('title');
+            $prompt = get_sub_field('prompt');
+            $entry = get_sub_field('entry');
+            $weight = get_sub_field('weight');
+
+            $output .= "Title: $title\n";
+            $output .= "Prompt: $prompt\n";
+            $output .= "Entry: $entry\n";
+            $output .= "Weight: $weight\n";
+        }
+    }
+
+    return $output;
+}
+
+
 // Sensei and Deshi username merge tags
 add_filter( 'gform_replace_merge_tags', 'username_replace_merge_tags', 10, 7 );
 function username_replace_merge_tags( $text, $form, $entry, $url_encode, $esc_html, $nl2br, $format ) {
