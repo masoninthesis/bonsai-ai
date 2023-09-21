@@ -6,11 +6,11 @@ require_once 'vendor/autoload.php';
 
 // Register the function for multiple forms
 add_action('gform_after_submission_32', 'create_smart_goal', 10, 2);
-add_action('gform_after_submission_40', 'create_smart_goal', 10, 2);
+add_action('gform_after_submission_42', 'create_smart_goal', 10, 2);
 
 function create_smart_goal($entry, $form) {
     // Check form ID to ensure it's one of the forms we're interested in
-    if ($form['id'] != 32 && $form['id'] != 40) {
+    if ($form['id'] != 32 && $form['id'] != 42) {
         return;
     }
 
@@ -21,8 +21,8 @@ function create_smart_goal($entry, $form) {
     $openai_feed_tag = '';
     if ($form['id'] == 32) {
         $openai_feed_tag = '{openai_feed_60}';
-    } elseif ($form['id'] == 40) {
-        $openai_feed_tag = '{openai_feed_87}';
+    } elseif ($form['id'] == 42) {
+        $openai_feed_tag = '{openai_feed_91}';
     }
 
     // Extract data from the form
