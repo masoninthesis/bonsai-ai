@@ -165,7 +165,7 @@ function replace_current_post_content_and_comments($text, $form, $entry, $url_en
     $post_id = rgar($entry, 'post_id');
     $post = get_post($post_id);
     if ($post) {
-        $post_content = $post->post_content;
+        $post_content = wp_strip_all_tags($post->post_content);
 
         // Get comments for this post in chronological order
         $comments = get_comments(array(
@@ -173,10 +173,10 @@ function replace_current_post_content_and_comments($text, $form, $entry, $url_en
             'order' => 'ASC',
         ));
 
-        // Update the array_map function to include comment author
+        // Update the array_map function to include comment author and remove HTML tags from comments
         $comments_content = array_map(function($comment) {
             $author_label = $comment->comment_author === 'Sensei' ? $comment->comment_author : 'The deshi ' . $comment->comment_author;
-            return $author_label . ' says: ' . $comment->comment_content;
+            return $author_label . ' says: ' . wp_strip_all_tags($comment->comment_content);
         }, $comments);
 
         // Combine post content and comments
@@ -186,6 +186,7 @@ function replace_current_post_content_and_comments($text, $form, $entry, $url_en
     }
     return $text;
 }
+
 
 // New Journal Entry Post Slug Merge tag
 add_filter( 'gform_custom_merge_tags', 'custom_merge_tags', 10, 4 );
@@ -340,6 +341,28 @@ function username_replace_merge_tags( $text, $form, $entry, $url_encode, $esc_ht
     return $text;
 }
 
+// Sensei post metadata merge tag
+add_filter('gform_replace_merge_tags', 'replace_sensei_merge_tag', 10, 7);
+
+function replace_sensei_merge_tag($text, $form, $entry, $url_encode, $esc_html, $nl2br, $format) {
+    $custom_merge_tag = '{sensei}';
+
+    // Check if our custom merge tag is used in the text
+    if (strpos($text, $custom_merge_tag) === false) {
+        return $text;
+    }
+
+    // Fetch the current post ID
+    $current_post_id = get_the_ID();
+
+    // Get the 'sensei' meta value from the current post
+    $sensei_value = get_post_meta($current_post_id, 'sensei', true);
+
+    // Replace the merge tag
+    return str_replace($custom_merge_tag, $sensei_value, $text);
+}
+
+
 // Current post author username merge tag
 // Register custom merge tags
 add_filter('gform_custom_merge_tags', 'register_author_username_merge_tag', 10, 4);
@@ -489,6 +512,47 @@ add_filter('gform_replace_merge_tags', function($text, $form, $entry, $url_encod
     return $text;
 
 }, 10, 7);
+
+// SenseiModules: My Pitch Merge Tags
+add_filter('gform_replace_merge_tags', 'replace_acf_merge_tags', 10, 7);
+function replace_acf_merge_tags($text, $form, $entry, $url_encode, $esc_html, $nl2br, $format) {
+    for ($i = 1; $i <= 10; $i++) {
+        $merge_tag = "{my_pitch_{$i}}";
+        if (strpos($text, $merge_tag) !== false) {
+            $current_user_id = get_current_user_id();
+            $acf_value = get_field("my_pitch_{$i}", 'user_' . $current_user_id);
+
+            // Debugging lines
+            // error_log("Current User ID: " . $current_user_id);
+            // error_log("ACF Field Value for my_pitch_{$i}: " . print_r($acf_value, true));
+
+            $text = str_replace($merge_tag, $acf_value, $text);
+        }
+    }
+    return $text;
+}
+
+// Fetch current post category
+add_filter('gform_replace_merge_tags', 'replace_category_slug_merge_tag', 10, 7);
+function replace_category_slug_merge_tag($text, $form, $entry, $url_encode, $esc_html, $nl2br, $format) {
+    $custom_merge_tag = '{category_slug}';
+
+    if (strpos($text, $custom_merge_tag) === false) {
+        return $text;
+    }
+
+    global $post;
+    $category_slug = '';
+
+    if (is_object($post) && isset($post->ID)) {
+        $categories = get_the_category($post->ID);
+        if (!empty($categories)) {
+            $category_slug = $categories[0]->slug;
+        }
+    }
+
+    return str_replace($custom_merge_tag, $category_slug, $text);
+}
 
 // Abandon Goal URL Merge Tag
 // add_filter('gform_custom_merge_tags', 'add_abandon_goal_merge_tag', 10, 4);

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Bonsai AI
  * Description: A WordPress plugin that adds AI functionalities such as Sensei AI, and SenseiOS
- * Version: 0.0.1-alpha-0.76
+ * Version: 0.0.1-alpha-0.77
  * Author: Jackalope Labs
  * Author URI: https://bonsai.so/
  */
@@ -68,8 +68,9 @@ require_once plugin_dir_path( __FILE__ ) . 'directives.php';
 // Daily check-ins functionality
 require_once plugin_dir_path( __FILE__ ) . 'daily-checkins.php';
 
-// Custom module functionality
-require_once plugin_dir_path( __FILE__ ) . 'modules/custom.php';
+// SenseiModules functionality
+// Pitch Sensei
+require_once plugin_dir_path( __FILE__ ) . 'modules/pitch-sensei.php';
 
 // Include the admin menu
 require_once plugin_dir_path( __FILE__ ) . 'admin/admin-menu.php';
