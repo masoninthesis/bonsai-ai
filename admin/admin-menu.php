@@ -33,6 +33,53 @@ function bonsai_ai_admin_menu() {
 add_action('admin_menu', 'bonsai_ai_admin_menu');
 
 // Main settings page content
+// Invite code
 function bonsai_ai_settings_page() {
-    echo '<h1>Bonsai AI Settings</h1>';
+    ?>
+    <h1>Bonsai AI Settings</h1>
+    <form method="post" action="options.php">
+        <?php
+        // Add nonce, action, and option_page fields for a settings page.
+        settings_fields('bonsai_ai_settings_group');
+
+        // Output the invite code settings section
+        do_settings_sections('bonsai_ai_settings');
+
+        // Output the submit button
+        submit_button();
+        ?>
+    </form>
+    <?php
+}
+
+// Initialize the option during admin initialization
+add_action('admin_init', 'register_bonsai_ai_setting');
+function register_bonsai_ai_setting() {
+    register_setting(
+        'bonsai_ai_settings_group', // Group
+        'my_correct_invite_code',   // Option name
+        'sanitize_text_field'       // Sanitize callback
+    );
+
+    add_settings_section(
+        'bonsai_ai_invite_code_section', // ID
+        'Invite Code Settings',          // Title
+        null,                            // Callback
+        'bonsai_ai_settings'             // Page
+    );
+
+    add_settings_field(
+        'my_correct_invite_code',         // ID
+        'Invite Code',                    // Title
+        'bonsai_ai_correct_invite_code_callback_function', // Callback
+        'bonsai_ai_settings',             // Page
+        'bonsai_ai_invite_code_section',  // Section
+        array('label_for' => 'my_correct_invite_code')
+    );
+}
+
+// Callback function to display the text field
+function bonsai_ai_correct_invite_code_callback_function($args) {
+    $option = get_option('my_correct_invite_code');
+    echo '<input type="text" id="' . $args['label_for'] . '" name="' . $args['label_for'] . '" value="' . $option . '">';
 }
