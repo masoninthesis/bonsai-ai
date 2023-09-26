@@ -33,10 +33,12 @@ function create_or_update_pitch_sensei_post($entry, $form) {
     $custom_8 = rgar($entry, '13');
     $custom_9 = rgar($entry, '14');
     $custom_10 = rgar($entry, '15');
+    $custom_11 = rgar($entry, '17');
     $sensei_data = rgar($entry, '16');
     $response_raw = GFCommon::replace_variables('{openai_feed_93}', $form, $entry);
     $response = $parsedown->text($response_raw);
-    $post_content = '<div class="alert alert-info"><strong>Intro: </strong>' . $custom_1 . '</div>' .
+    $post_content = '<div class="card card-body active mb-4"><strong>Elevator Pitch: </strong>' . $custom_11 . '</div>' .
+                '<div class="alert alert-info"><strong>Intro: </strong>' . $custom_1 . '</div>' .
                 '<div class="alert alert-info"><strong>Problem: </strong>' . $custom_2 . '</div>' .
                 '<div class="alert alert-info"><strong>Product demo: </strong>' . $custom_3 . '</div>' .
                 '<div class="alert alert-info"><strong>Business model: </strong>' . $custom_4 . '</div>' .
@@ -46,7 +48,7 @@ function create_or_update_pitch_sensei_post($entry, $form) {
                 '<div class="alert alert-info"><strong>Go-to Market: </strong>' . $custom_8 . '</div>' .
                 '<div class="alert alert-info"><strong>Roadmap: </strong>' . $custom_9 . '</div>' .
                 '<div class="alert alert-info"><strong>Team: </strong>' . $custom_10 . '</div>' .
-                '<div class="alert alert-success my-3 ml-5">' . $response . '</div>';
+                '<div id="sensei_response" class="alert alert-success my-3 ml-5">' . $response . '</div>';
 
     // Fetch the current user ID
     $current_user_id = get_current_user_id();
@@ -55,8 +57,8 @@ function create_or_update_pitch_sensei_post($entry, $form) {
     $current_post_id = get_the_ID();
 
     // Update the ACF fields for both scenarios (new post or update)
-    $acf_fields = array('my_pitch_1', 'my_pitch_2', 'my_pitch_3', 'my_pitch_4', 'my_pitch_5', 'my_pitch_6', 'my_pitch_7', 'my_pitch_8', 'my_pitch_9', 'my_pitch_10');
-    $custom_fields = array($custom_1, $custom_2, $custom_3, $custom_4, $custom_5, $custom_6, $custom_7, $custom_8, $custom_9, $custom_10);
+    $acf_fields = array('my_pitch_1', 'my_pitch_2', 'my_pitch_3', 'my_pitch_4', 'my_pitch_5', 'my_pitch_6', 'my_pitch_7', 'my_pitch_8', 'my_pitch_9', 'my_pitch_10', 'my_elevator_pitch');
+    $custom_fields = array($custom_1, $custom_2, $custom_3, $custom_4, $custom_5, $custom_6, $custom_7, $custom_8, $custom_9, $custom_10, $custom_11);
 
     for ($i = 0; $i < count($acf_fields); $i++) {
         update_field($acf_fields[$i], $custom_fields[$i], 'user_' . $current_user_id);
@@ -159,7 +161,7 @@ function custom_accordion_for_gf_fields($content, $field, $value, $lead_id, $for
             return $accordion_content;
         }
         // Check if the field is the second one (e.g., the field with input ID 6)
-        elseif ($field->id == 6) {
+        elseif ($field->id == 17) {
             $accordion_content = "
                             {$content}
                         </div>

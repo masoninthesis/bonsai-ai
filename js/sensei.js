@@ -33,3 +33,29 @@ jQuery(document).ready(function($) {
         });
     });
 });
+
+// Pitch Sensei Sections
+jQuery(document).ready(function($) {
+    // Function to update class based on textarea value
+    function updateClass(textarea, label) {
+        if (textarea.val().trim() !== '') {
+            label.addClass('text-primary');
+        } else {
+            label.removeClass('text-primary');
+        }
+    }
+
+    // Loop through each textarea and its corresponding label
+    $('[id^=input_40_]').each(function() {
+        var textarea = $(this);
+        var label = textarea.closest('li').find('span.mr-3');
+
+        // Update class based on initial value
+        updateClass(textarea, label);
+
+        // Attach event listener for future changes
+        textarea.on('input', function() {
+            updateClass(textarea, label);
+        });
+    });
+});
