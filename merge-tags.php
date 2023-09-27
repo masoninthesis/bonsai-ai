@@ -516,7 +516,7 @@ add_filter('gform_replace_merge_tags', function($text, $form, $entry, $url_encod
 // SenseiModules: My Pitch Merge Tags
 add_filter('gform_replace_merge_tags', 'replace_acf_merge_tags', 10, 7);
 function replace_acf_merge_tags($text, $form, $entry, $url_encode, $esc_html, $nl2br, $format) {
-    for ($i = 1; $i <= 10; $i++) {
+    for ($i = 1; $i <= 11; $i++) {
         $merge_tag = "{my_pitch_{$i}}";
         if (strpos($text, $merge_tag) !== false) {
             $current_user_id = get_current_user_id();

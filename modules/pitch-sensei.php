@@ -57,7 +57,7 @@ function create_or_update_pitch_sensei_post($entry, $form) {
     $current_post_id = get_the_ID();
 
     // Update the ACF fields for both scenarios (new post or update)
-    $acf_fields = array('my_pitch_1', 'my_pitch_2', 'my_pitch_3', 'my_pitch_4', 'my_pitch_5', 'my_pitch_6', 'my_pitch_7', 'my_pitch_8', 'my_pitch_9', 'my_pitch_10', 'my_elevator_pitch');
+    $acf_fields = array('my_pitch_1', 'my_pitch_2', 'my_pitch_3', 'my_pitch_4', 'my_pitch_5', 'my_pitch_6', 'my_pitch_7', 'my_pitch_8', 'my_pitch_9', 'my_pitch_10', 'my_pitch_11');
     $custom_fields = array($custom_1, $custom_2, $custom_3, $custom_4, $custom_5, $custom_6, $custom_7, $custom_8, $custom_9, $custom_10, $custom_11);
 
     for ($i = 0; $i < count($acf_fields); $i++) {
