@@ -11,33 +11,41 @@ function create_ask_sensei_post($entry, $form) {
     // Initialize Parsedown
     $parsedown = new Parsedown();
 
-    // extract data from the form
+    // Extract data from the form
     $post_title = rgar($entry, '3');
     $question = rgar($entry, '1');
     $response_raw = GFCommon::replace_variables('{openai_feed_34}', $form, $entry);
     $response = $parsedown->text($response_raw);
-    $post_content = '<div class="alert alert-info">'.$question.'</div><div class="alert alert-success my-3 ml-5">'.$response.'</div>';
 
     // Identify the Sensei user ID
     $current_post_id = get_the_ID();
-    $sensei_user_id = get_post_field('post_author', $current_post_id);
+    $sensei_author_id = get_post_field('post_author', $current_post_id);
+    $sensei_author = get_userdata($sensei_author_id);
 
-    // get the category object by slug
+    // Fetch the current user ID
+    $current_user_id = get_current_user_id();
+
+    $post_content = '<div class="badge badge-secondary">' . esc_html($sensei_author->display_name) . '</div></br>' . '<div class="alert alert-info">'.$question.'</div><div class="alert alert-success my-3 ml-5">'.$response.'</div>';
+
+    // Get the category object by slug
     $category = get_term_by('slug', 'ask-sensei', 'category');
 
-    // prepare the post data
+    // Prepare the post data
     $post_data = array(
         'post_title'    => wp_strip_all_tags($post_title),
         'post_content'  => $post_content,
         'post_status'   => 'publish',
         'post_type'     => 'post',
-        'post_author'   => $sensei_user_id,  // Set the Sensei as the post author
+        'post_author'   => $current_user_id,
         'comment_status'=> 'open',
-        'post_category' => array( $category->term_id ),
+        'post_category' => array($category->term_id),
     );
 
-    // insert the post
+    // Insert the post
     $post_id = wp_insert_post($post_data);
+
+    // Add or update the new meta field for the Sensei user ID
+    update_post_meta($post_id, 'sensei_author', $sensei_author_id);
 
     // Fetch the senseios_fields using the merge tag
     $senseios_fields = GFCommon::replace_variables('{senseios_fields}', $form, $entry);

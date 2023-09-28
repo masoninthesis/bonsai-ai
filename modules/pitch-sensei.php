@@ -37,7 +37,17 @@ function create_or_update_pitch_sensei_post($entry, $form) {
     $sensei_data = rgar($entry, '16');
     $response_raw = GFCommon::replace_variables('{openai_feed_93}', $form, $entry);
     $response = $parsedown->text($response_raw);
-    $post_content = '<div class="card card-body active mb-4"><strong>Elevator Pitch: </strong>' . $custom_11 . '</div>' .
+
+    // Identify the Sensei user ID
+    $current_post_id = get_the_ID();
+    $sensei_author_id = get_post_field('post_author', $current_post_id);
+    $sensei_author = get_userdata($sensei_author_id);
+
+    // Add Sensei author to the post content
+    $post_content = '<div class="badge badge-secondary">' . esc_html($sensei_author->display_name) . '<div></br>';
+
+    // Append the rest of the post content
+    $post_content .= '<div class="card card-body active mb-4"><strong>Elevator Pitch: </strong>' . $custom_11 . '</div>' .
                 '<div class="alert alert-info"><strong>Intro: </strong>' . $custom_1 . '</div>' .
                 '<div class="alert alert-info"><strong>Problem: </strong>' . $custom_2 . '</div>' .
                 '<div class="alert alert-info"><strong>Product demo: </strong>' . $custom_3 . '</div>' .
@@ -53,10 +63,7 @@ function create_or_update_pitch_sensei_post($entry, $form) {
     // Fetch the current user ID
     $current_user_id = get_current_user_id();
 
-    // Fetch the current post ID
-    $current_post_id = get_the_ID();
-
-    // Update the ACF fields for both scenarios (new post or update)
+    // Update the ACF fields
     $acf_fields = array('my_pitch_1', 'my_pitch_2', 'my_pitch_3', 'my_pitch_4', 'my_pitch_5', 'my_pitch_6', 'my_pitch_7', 'my_pitch_8', 'my_pitch_9', 'my_pitch_10', 'my_pitch_11');
     $custom_fields = array($custom_1, $custom_2, $custom_3, $custom_4, $custom_5, $custom_6, $custom_7, $custom_8, $custom_9, $custom_10, $custom_11);
 
@@ -64,7 +71,7 @@ function create_or_update_pitch_sensei_post($entry, $form) {
         update_field($acf_fields[$i], $custom_fields[$i], 'user_' . $current_user_id);
     }
 
-    // Check if the form is in the 'sensei-pitch' category
+    // Insert or update the post
     if (has_term('pitch-sensei', 'category', $current_post_id)) {
         // Update the current post's content with the generated response
         $updated_post = array(
@@ -73,23 +80,9 @@ function create_or_update_pitch_sensei_post($entry, $form) {
         );
         wp_update_post($updated_post);
 
-        // Fetch the senseios_fields using the merge tag
-        $senseios_fields = GFCommon::replace_variables('{senseios_fields}', $form, $entry);
-
-        // Check the data type
-        if (is_array($senseios_fields)) {
-            $senseios_fields = json_encode($senseios_fields);
-        }
-
-        // Add or update the senseios_fields as a meta field to the post
-        update_post_meta($current_post_id, 'senseios_fields', $senseios_fields);
-
-        // Add or update the Deshi's user ID as a meta field to the post
-        update_post_meta($current_post_id, 'deshi_op', get_current_user_id());
+        // Add or update the sensei_author as a meta field to the post
+        update_post_meta($current_post_id, 'sensei_author', $sensei_author_id);
     } else {
-        // Identify the Sensei user ID
-        $sensei_user_id = get_post_field('post_author', $current_post_id);
-
         // get the category object by slug
         $category = get_term_by('slug', 'pitch-sensei', 'category');
 
@@ -106,6 +99,14 @@ function create_or_update_pitch_sensei_post($entry, $form) {
 
         // insert the post
         $post_id = wp_insert_post($post_data);
+
+        // Add or update the new meta field for the Sensei user ID
+        if (has_term('pitch-sensei', 'category', $current_post_id)) {
+            update_post_meta($current_post_id, 'sensei_author', $sensei_author_id);
+        } else {
+            // Add 'sensei_author' as a meta field to the new post
+            add_post_meta($post_id, 'sensei_author', $sensei_author_id);
+        }
 
         // Fetch the senseios_fields using the merge tag
         $senseios_fields = GFCommon::replace_variables('{senseios_fields}', $form, $entry);

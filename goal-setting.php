@@ -31,8 +31,13 @@ function create_smart_goal($entry, $form) {
     $response_raw = GFCommon::replace_variables($openai_feed_tag, $form, $entry);
     $response = $parsedown->text($response_raw);  // Markdown parsing
 
+    // Identify the Sensei user ID
+    $current_post_id = get_the_ID();
+    $sensei_author_id = get_post_field('post_author', $current_post_id);
+    $sensei_author = get_userdata($sensei_author_id);
+
     // Construct the post content using the question and response
-    $post_content = '<div class="alert alert-info">' . $goal . '</div><div class="alert alert-success my-3 ml-5">' . $response . '</div>';
+    $post_content = '<div class="badge badge-secondary">' . esc_html($sensei_author->display_name) . '<div></br>' . '<div class="alert alert-info">' . $goal . '</div><div class="alert alert-success my-3 ml-5">' . $response . '</div>';
 
     // Get the category object by slug
     $category = get_term_by('slug', 'goals-journal-entries', 'category');
@@ -50,6 +55,9 @@ function create_smart_goal($entry, $form) {
 
     // Insert the post
     $post_id = wp_insert_post($post_data);
+
+    // Add or update the new meta field for the Sensei user ID
+    update_post_meta($post_id, 'sensei_author', $sensei_author_id);
 
     // Fetch the senseios_fields using the merge tag
     $senseios_fields = GFCommon::replace_variables('{senseios_fields}', $form, $entry);
