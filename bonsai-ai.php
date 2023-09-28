@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Bonsai AI
  * Description: A WordPress plugin that adds AI functionalities such as Sensei AI, and SenseiOS
- * Version: 0.0.1-alpha-0.81
+ * Version: 0.0.1-alpha-0.82
  * Author: Jackalope Labs
  * Author URI: https://bonsai.so/
  */
@@ -32,9 +32,6 @@ require_once plugin_dir_path( BONSAI_AI_PLUGIN_FILE ) . 'journal-prompts.php';
 // Journal entries functionality
 require_once plugin_dir_path(__FILE__) . 'journal-entries.php';
 
-// Ask Sensei functionality
-require_once plugin_dir_path(__FILE__) . 'ask-sensei.php';
-
 // Chat functionality
 require_once plugin_dir_path(__FILE__) . 'chat.php';
 
@@ -47,14 +44,22 @@ require_once plugin_dir_path(__FILE__) . 'deshi.php';
 // Set goal functionality
 require_once plugin_dir_path( __FILE__ ) . 'login.php';
 
+// SenseiModules functionality
+// Ask Sensei functionality
+require_once plugin_dir_path( __FILE__ ) . 'modules/ask-sensei.php';
 // Set goal functionality
-require_once plugin_dir_path( __FILE__ ) . 'goal-setting.php';
+require_once plugin_dir_path( __FILE__ ) . 'modules/goal-setting.php';
+// Pitch Sensei
+require_once plugin_dir_path( __FILE__ ) . 'modules/pitch-sensei.php';
 
 // Goal check-in functionality
 require_once plugin_dir_path( __FILE__ ) . 'goal-checkin.php';
 
 // Goals functionality
 require_once plugin_dir_path( __FILE__ ) . 'goals.php';
+
+// Pagination functionality
+require_once plugin_dir_path( __FILE__ ) . 'pagination.php';
 
 // Sensei functionality
 require_once plugin_dir_path( __FILE__ ) . 'sensei.php';
@@ -73,10 +78,6 @@ require_once plugin_dir_path( __FILE__ ) . 'directives.php';
 
 // Daily check-ins functionality
 require_once plugin_dir_path( __FILE__ ) . 'daily-checkins.php';
-
-// SenseiModules functionality
-// Pitch Sensei
-require_once plugin_dir_path( __FILE__ ) . 'modules/pitch-sensei.php';
 
 // Include the admin menu
 require_once plugin_dir_path( __FILE__ ) . 'admin/admin-menu.php';

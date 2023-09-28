@@ -1,6 +1,6 @@
 <?php
 // Include Parsedown class
-require_once 'vendor/autoload.php';
+require dirname(__DIR__) . '/vendor/autoload.php';
 
 // This file handles functionality related to chat system
 
