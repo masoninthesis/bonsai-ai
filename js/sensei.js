@@ -59,3 +59,34 @@ jQuery(document).ready(function($) {
         });
     });
 });
+
+// Click to copy SenseiBlocks and full SenseiOS
+document.addEventListener("DOMContentLoaded", function () {
+    const copyText = document.getElementById("copyText");
+    const copyButton = document.getElementById("copyButton");
+
+    copyButton.addEventListener("click", function () {
+        // Create a range to select the text within the element
+        const range = document.createRange();
+        range.selectNode(copyText);
+
+        // Create a selection object and select the text
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        // Copy the selected text to the clipboard
+        document.execCommand("copy");
+
+        // Deselect the text
+        selection.removeAllRanges();
+
+        // Add a visual indication (change button text to the icon)
+        copyButton.innerHTML = "<i class='fas fa-check'></i> Copied!";
+
+        // Reset the button text after a brief delay (optional)
+        setTimeout(function () {
+            copyButton.innerHTML = "<i class='fas fa-copy'></i> Copy";
+        }, 1000); // Reset after 1 second
+    });
+});
