@@ -44,7 +44,7 @@ function create_or_update_pitch_sensei_post($entry, $form) {
     $sensei_author = get_userdata($sensei_author_id);
 
     // Add Sensei author to the post content
-    $post_content = '<div class="badge badge-secondary">' . esc_html($sensei_author->display_name) . '<div></br>';
+    $post_content = '<div class="badge badge-secondary">' . esc_html($sensei_author->display_name) . '</div></br>';
 
     // Append the rest of the post content
     $post_content .= '<div class="card card-body active mb-4"><strong>Elevator Pitch: </strong>' . $custom_11 . '</div>' .
