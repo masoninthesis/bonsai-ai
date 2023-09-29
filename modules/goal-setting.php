@@ -37,7 +37,7 @@ function create_smart_goal($entry, $form) {
     $sensei_author = get_userdata($sensei_author_id);
 
     // Construct the post content using the question and response
-    $post_content = '<div class="badge badge-secondary">' . esc_html($sensei_author->display_name) . '<div></br>' . '<div class="alert alert-info">' . $goal . '</div><div class="alert alert-success my-3 ml-5">' . $response . '</div>';
+    $post_content = '<div class="badge badge-secondary">' . esc_html($sensei_author->display_name) . '</div></br>' . '<div class="alert alert-info">' . $goal . '</div><div class="alert alert-success my-3 ml-5">' . $response . '</div>';
 
     // Get the category object by slug
     $category = get_term_by('slug', 'goals-journal-entries', 'category');
