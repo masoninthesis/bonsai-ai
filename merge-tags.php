@@ -532,6 +532,24 @@ function replace_acf_merge_tags($text, $form, $entry, $url_encode, $esc_html, $n
     return $text;
 }
 
+// SenseiModules: Daily Checkin Merge Tags
+add_filter('gform_replace_merge_tags', 'replace_daily_checkin_merge_tags', 10, 7);
+function replace_daily_checkin_merge_tags($text, $form, $entry, $url_encode, $esc_html, $nl2br, $format) {
+    for ($i = 1; $i <= 4; $i++) {
+        $merge_tag = "{checkin_{$i}}";
+        if (strpos($text, $merge_tag) !== false) {
+            // Updated Line: Get the current post ID
+            $current_post_id = get_the_ID();
+
+            // Updated Line: Fetch ACF field from the current post
+            $acf_value = get_field("checkin_{$i}", $current_post_id);
+
+            $text = str_replace($merge_tag, $acf_value, $text);
+        }
+    }
+    return $text;
+}
+
 // Fetch current post category
 add_filter('gform_replace_merge_tags', 'replace_category_slug_merge_tag', 10, 7);
 function replace_category_slug_merge_tag($text, $form, $entry, $url_encode, $esc_html, $nl2br, $format) {

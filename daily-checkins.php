@@ -4,7 +4,7 @@ require_once 'vendor/autoload.php';
 
 // This file handles functionality related to daily checkin
 // Post Creation
-add_action('gform_after_submission_29', 'create_daily_checkin', 10, 2);
+add_action('gform_after_submission_40', 'create_daily_checkin', 10, 2);
 
 function create_daily_checkin($entry, $form) {
     // Initialize Parsedown
@@ -121,7 +121,7 @@ function create_daily_checkin($entry, $form) {
 }
 
 // Redirect to reload the form instead of showing the confirmation message
-add_filter('gform_confirmation_29', 'daily_checkin_confirmation', 10, 4);
+add_filter('gform_confirmation_40', 'daily_checkin_confirmation', 10, 4);
 function daily_checkin_confirmation($confirmation, $form, $entry, $ajax) {
     if (!empty(rgar($entry, '7')) || !empty(rgar($entry, '8')) || !empty(rgar($entry, '9'))) {
         $redirect_url = rgar($entry, 'source_url');
