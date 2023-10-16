@@ -11,7 +11,13 @@ function post_to_third_party($entry, $form)
     $post_id = $entry[4];
     $username = $entry[5];
     $deshi_comment = $entry[1];
-    $sensei_comment = GFCommon::replace_variables('{openai_feed_37}', $form, $entry);  // Fetch the Sensei comment here
+
+    // Try to fetch comments from both feeds
+    $pitch_sensei_comment = GFCommon::replace_variables('{openai_feed_37}', $form, $entry);
+    $ask_sensei_comment = GFCommon::replace_variables('{openai_feed_95}', $form, $entry);
+
+    // Use whichever feed has a value
+    $sensei_comment = !empty($pitch_sensei_comment) ? $pitch_sensei_comment : $ask_sensei_comment;
 
     gf_openai_comments($post_id, $username, $deshi_comment, $sensei_comment, $form, $entry);  // Pass all required variables
 }
