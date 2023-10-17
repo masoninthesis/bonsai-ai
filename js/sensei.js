@@ -1,3 +1,5 @@
+console.log('sensei.js loaded');
+
 // Sensei Upgrade: Sensei upgrade password field is hidden if deshi user is already logged in
 jQuery(document).ready(function($) {
     $('#input_25_3').hide();
@@ -126,4 +128,28 @@ document.addEventListener("DOMContentLoaded", function () {
             mergeCopyButton.innerHTML = "<i class='fas fa-copy'></i> Copy SenseiOS";
         }, 1000); // Reset after 1 second
     });
+});
+
+// Click to copy Pitch Practice Prompt
+document.addEventListener("DOMContentLoaded", function() {
+  // Add event listener to copy button
+  const copyButton = document.getElementById("copyButton_pitchPractice");
+
+  copyButton.addEventListener("click", function() {
+    // Get the textarea value using its id
+    const textAreaValue = document.getElementById("input_40_18").value;
+
+    // Copy the value to the clipboard
+    navigator.clipboard.writeText(textAreaValue).then(function() {
+      // Indicate that text has been copied
+      copyButton.innerHTML = '<i class="fas fa-check mr-1"></i> Copied!';
+
+      // Revert button text back to original after 2 seconds
+      setTimeout(function() {
+        copyButton.innerHTML = '<i class="fas fa-copy mr-1"></i> Copy Pitch Practice Prompt';
+      }, 2000);
+    }).catch(function(err) {
+      // Handle errors here
+    });
+  });
 });
