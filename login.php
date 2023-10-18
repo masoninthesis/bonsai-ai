@@ -25,14 +25,9 @@ function bonsai_redirect_on_login($user_login, $user) {
     if ($is_sensei) {
         $redirect_url = home_url("/sensei/{$user_login}");
     }
-    // Else, if the user is a Deshi, redirect them to their Deshi profile page
-    // elseif ($is_deshi) {
-    //     $redirect_url = home_url("/deshi/{$user_login}");
-    // }
     // For other roles, redirect to the current page
     else {
-        error_log("Referrer URL: " . wp_get_referer());
-        $redirect_url = wp_get_referer() ?: home_url();
+        $redirect_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
     }
 
     wp_redirect($redirect_url);

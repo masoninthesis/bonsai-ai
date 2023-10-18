@@ -2,6 +2,7 @@
 // Post creation and redirect for Deshi Signup
 // Deshi Account Creation
 add_action( 'gform_after_submission_34', 'create_deshi_and_redirect', 10, 2 );
+add_action( 'gform_after_submission_43', 'create_deshi_and_redirect', 10, 2 );
 function create_deshi_and_redirect( $entry, $form ) {
 
     $username = rgar( $entry, '1' );
@@ -55,17 +56,13 @@ function create_deshi_and_redirect( $entry, $form ) {
                 );
 
                 $user = wp_signon( $creds, false );
-
-                if ( is_wp_error( $user ) ) {
-                    error_log( "Failed to log in user. Error: " . $user->get_error_message() );
-                }
             }
 
-            // Log the redirection for debugging
-            error_log( "Redirecting to post with ID: " . $post_id );
+            // Capture the referrer URL from server variables or form field
+            $referrer_url = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
 
-            // Redirect to the new post
-            wp_redirect( $url );
+            // Redirect to the referrer URL or to the new post if referrer is not available
+            wp_redirect( !empty($referrer_url) ? $referrer_url : get_permalink( $post_id ) );
             exit;
         } else {
             error_log( "Failed to create post. Error: " . $post_id->get_error_message() );
