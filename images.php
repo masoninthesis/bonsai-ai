@@ -41,37 +41,22 @@ add_action('gform_after_submission_28', function($entry, $form) {
     );
     $attach_id = wp_insert_attachment($attachment, $upload['file']);
 
-    // Generate the attachment metadata
-    $attach_data = wp_generate_attachment_metadata($attach_id, $upload['file']);
-
-    // Update the attachment metadata
-    wp_update_attachment_metadata($attach_id, $attach_data);
-
     // Check if the file is an image and create a thumbnail
     if (wp_check_filetype($upload['file'])['ext']) {
         $image_editor = wp_get_image_editor($upload['file']);
         if (!is_wp_error($image_editor)) {
+
+            $upload_dir = wp_upload_dir();
+            $new_image_path = $upload_dir['path'] . '/' . wp_basename($upload['file'], '.' . $wp_filetype['ext']) . '-bonsai_thumbnail.' . $wp_filetype['ext'];
+
             $image_editor->resize(76, 76, true);
-            $image_editor->save($upload['file']);
+            $image_editor->save($new_image_path);
         }
     }
 
     // Update the entry field with the attachment ID
     if ($attach_id) {
-        // Log the current value before updating
-        $current_value = GFAPI::get_entry($entry['id'])['6'];
-        error_log("Current Value Before Update: $current_value");
-
-        // Log the attachment ID
-        error_log("Attachment ID: $attach_id");
-
-        // Update the entry field with the attachment ID
-        $result = GFAPI::update_entry_field($entry['id'], '6', $attach_id);
-        error_log("Update Result: " . print_r($result, true));
-
-        // Log the current value after updating
-        $current_value_after = GFAPI::get_entry($entry['id'])['6'];
-        error_log("Current Value After Update: $current_value_after");
+        GFAPI::update_entry_field($entry['id'], '6', $attach_id);
     } else {
         error_log('Attachment could not be created');
     }
