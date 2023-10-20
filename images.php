@@ -35,6 +35,14 @@ add_action('gform_after_submission_28', function($entry, $form) {
     // Update the entry field with the attachment ID
     if ($attach_id) {
         GFAPI::update_entry_field($entry['id'], '6', $attach_id);
+
+        $current_user_id = get_current_user_id();
+
+        if($current_user_id > 0) { // Only proceed if a user is logged in
+            update_user_meta($current_user_id, 'profile_img', $attach_id);
+        } else {
+            error_log('No user is logged in. Profile image not saved to user meta.');
+        }
     } else {
         // Debugging: Check for attachment ID
         if (!$attach_id && wp_last_error()) {
