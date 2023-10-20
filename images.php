@@ -1,13 +1,4 @@
 <?php
-// Add custom image size
-function bonsai_add_custom_image_size() {
-    // Define new image size (name, width, height, crop)
-    add_image_size('bonsai_thumbnail', 76, 76, true);
-}
-
-// Hook into the 'after_setup_theme' action
-add_action('after_setup_theme', 'bonsai_add_custom_image_size');
-
 // Uploaded image populates field with image ID
 add_action('gform_after_submission_28', function($entry, $form) {
     // Get the temporary file path from Gravity Forms
@@ -41,23 +32,14 @@ add_action('gform_after_submission_28', function($entry, $form) {
     );
     $attach_id = wp_insert_attachment($attachment, $upload['file']);
 
-    // Check if the file is an image and create a thumbnail
-    if (wp_check_filetype($upload['file'])['ext']) {
-        $image_editor = wp_get_image_editor($upload['file']);
-        if (!is_wp_error($image_editor)) {
-
-            $upload_dir = wp_upload_dir();
-            $new_image_path = $upload_dir['path'] . '/' . wp_basename($upload['file'], '.' . $wp_filetype['ext']) . '-bonsai_thumbnail.' . $wp_filetype['ext'];
-
-            $image_editor->resize(76, 76, true);
-            $image_editor->save($new_image_path);
-        }
-    }
-
     // Update the entry field with the attachment ID
     if ($attach_id) {
         GFAPI::update_entry_field($entry['id'], '6', $attach_id);
     } else {
+        // Debugging: Check for attachment ID
+        if (!$attach_id && wp_last_error()) {
+            error_log('WordPress Error: ' . wp_last_error());
+        }
         error_log('Attachment could not be created');
     }
 }, 10, 2);
