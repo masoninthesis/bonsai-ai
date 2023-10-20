@@ -32,6 +32,10 @@ add_action('gform_after_submission_28', function($entry, $form) {
     );
     $attach_id = wp_insert_attachment($attachment, $upload['file']);
 
+    // Generate the attachment metadata (this will create the additional image sizes)
+    $attach_data = wp_generate_attachment_metadata($attach_id, $upload['file']);
+    wp_update_attachment_metadata($attach_id, $attach_data);
+
     // Update the entry field with the attachment ID
     if ($attach_id) {
         GFAPI::update_entry_field($entry['id'], '6', $attach_id);
