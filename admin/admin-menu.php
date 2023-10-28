@@ -57,8 +57,8 @@ add_action('admin_init', 'register_bonsai_ai_setting');
 function register_bonsai_ai_setting() {
     register_setting(
         'bonsai_ai_settings_group', // Group
-        'my_correct_invite_code',   // Option name
-        'sanitize_text_field'       // Sanitize callback
+        'my_correct_invite_codes',  // Option name
+        'bonsai_ai_sanitize_invite_codes'  // New Sanitize callback
     );
 
     add_settings_section(
@@ -69,17 +69,28 @@ function register_bonsai_ai_setting() {
     );
 
     add_settings_field(
-        'my_correct_invite_code',         // ID
-        'Invite Code',                    // Title
+        'my_correct_invite_codes',         // ID
+        'Invite Codes',                    // Title
         'bonsai_ai_correct_invite_code_callback_function', // Callback
         'bonsai_ai_settings',             // Page
         'bonsai_ai_invite_code_section',  // Section
-        array('label_for' => 'my_correct_invite_code')
+        array('label_for' => 'my_correct_invite_codes')
     );
 }
 
-// Callback function to display the text field
+// Callback function to display the textarea
 function bonsai_ai_correct_invite_code_callback_function($args) {
-    $option = get_option('my_correct_invite_code');
-    echo '<input type="text" id="' . $args['label_for'] . '" name="' . $args['label_for'] . '" value="' . $option . '">';
+    $option = get_option('my_correct_invite_codes', array());
+    // var_dump(get_option('my_correct_invite_codes', array()));
+    $option_str = implode(', ', $option);
+    echo '<textarea id="' . $args['label_for'] . '" name="' . $args['label_for'] . '">' . esc_textarea($option_str) . '</textarea>';
+}
+
+// New sanitization function
+function bonsai_ai_sanitize_invite_codes($input) {
+    // Split codes by comma or newline and trim whitespace
+    $codes = preg_split("/[\s,]+/", $input);
+    // Remove any empty values from the array
+    $codes = array_filter($codes);
+    return $codes;
 }

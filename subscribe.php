@@ -88,37 +88,31 @@ function validate_invite_code($validation_result) {
     $target_form_id = 26; // Your form ID
     $target_field_id = 9; // Your field ID
 
-    // Skip if it's not the target form
     if (rgar($validation_result['form'], 'id') != $target_form_id) {
         return $validation_result;
     }
 
-    // Get the form object from the validation result
     $form = $validation_result['form'];
 
-    // Loop through the form fields
     foreach ($form['fields'] as &$field) {
 
-        // If this is not the invite code field, skip it
         if ($field->id != $target_field_id) {
             continue;
         }
 
-        // Get the submitted value from the $_POST
         $submitted_value = rgpost("input_{$field->id}");
 
-        // Get the correct invite code from WordPress options
-        $correct_invite_code = get_option('my_correct_invite_code', '');
+        // Get the correct invite codes from WordPress options
+        $correct_invite_codes = get_option('my_correct_invite_codes', array());
 
-        // If the submitted value does not equal our invite code, fail validation
-        if ($submitted_value !== $correct_invite_code) {
+        // If the submitted value is not in our array of invite codes, fail validation
+        if (!in_array($submitted_value, $correct_invite_codes)) {
             $validation_result['is_valid'] = false;
             $field->failed_validation = true;
             $field->validation_message = 'Invalid invite code';
         }
     }
 
-    // Assign modified $form object back to the validation result
     $validation_result['form'] = $form;
 
     return $validation_result;
