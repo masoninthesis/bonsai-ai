@@ -572,6 +572,28 @@ function replace_category_slug_merge_tag($text, $form, $entry, $url_encode, $esc
     return str_replace($custom_merge_tag, $category_slug, $text);
 }
 
+// Add a filter to replace {sensei_username} merge tag
+add_filter('sensei_username_merge_tag', 'get_sensei_username', 10, 1);
+
+function get_sensei_username($content) {
+    // Check if the content includes the {sensei_username} merge tag
+    if (strpos($content, '{sensei_username}') !== false) {
+        global $post;
+
+        // Get the sensei_author user ID from the post metadata
+        $user_id = get_post_meta($post->ID, 'sensei_author', true);
+
+        // Get the username from the user ID
+        $username = get_the_author_meta('user_login', $user_id);
+
+        // Replace the merge tag with the actual username
+        $content = str_replace('{sensei_username}', $username, $content);
+    }
+
+    return $content;
+}
+
+
 // Abandon Goal URL Merge Tag
 // add_filter('gform_custom_merge_tags', 'add_abandon_goal_merge_tag', 10, 4);
 //
