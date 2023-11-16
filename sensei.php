@@ -5,13 +5,13 @@ add_action( 'gform_after_submission_25', 'create_post_and_redirect', 10, 2 );
 function create_post_and_redirect( $entry, $form ) {
 
     $username = rgar( $entry, '1' );
-    $password = rgar( $entry, '3' );
+    $password = rgar( $entry, '8' );
     $email    = rgar( $entry, '2' );
 
     // Create empty password string if user is logged in so password doesn't change
     $password = '';
     if ( ! is_user_logged_in() ) {
-        $password = rgar( $entry, '3' );
+        $password = rgar( $entry, '8' );
     }
 
     // Check if the user exists

@@ -573,25 +573,24 @@ function replace_category_slug_merge_tag($text, $form, $entry, $url_encode, $esc
 }
 
 // Add a filter to replace {sensei_username} merge tag
-add_filter('sensei_username_merge_tag', 'get_sensei_username', 10, 1);
+function sensei_username_shortcode() {
+    global $post;
 
-function get_sensei_username($content) {
-    // Check if the content includes the {sensei_username} merge tag
-    if (strpos($content, '{sensei_username}') !== false) {
-        global $post;
+    // Get the sensei_author user ID from the post metadata
+    $user_id = get_post_meta($post->ID, 'sensei_author', true);
 
-        // Get the sensei_author user ID from the post metadata
-        $user_id = get_post_meta($post->ID, 'sensei_author', true);
+    if ($user_id) {
+        $user = get_user_by('ID', $user_id);
 
-        // Get the username from the user ID
-        $username = get_the_author_meta('user_login', $user_id);
-
-        // Replace the merge tag with the actual username
-        $content = str_replace('{sensei_username}', $username, $content);
+        if ($user) {
+            return $user->user_login;
+        }
     }
 
-    return $content;
+    // If for some reason the username cannot be retrieved, return an empty string
+    return '';
 }
+add_shortcode('sensei_username', 'sensei_username_shortcode');
 
 
 // Abandon Goal URL Merge Tag
