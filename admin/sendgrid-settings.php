@@ -57,10 +57,10 @@ function bonsai_ai_sendgrid_api_key_cb() {
 if (getenv('WP_ENV') !== 'development') {
     // Assign users to lists based on role
     $role_to_list_id_mapping = [
-        'subscriber' => 'b4fd5719-20e6-41b5-a5a5-db350e61d96d',
-        'pre_deshi'  => '17a852c3-7ab8-4384-a79c-a0d7ceefffa3',
-        'deshi'      => '08b7e55b-8e11-4c10-a5fc-803b56d528ae',
-        'sensei'     => '5af1f435-fc13-44ce-9731-f412f2b1ac5e',
+        'subscriber' => 'a54a143f-cce1-457b-9877-899571d3d7cc',
+        // 'pre_deshi'  => '17a852c3-7ab8-4384-a79c-a0d7ceefffa3',
+        // 'deshi'      => '08b7e55b-8e11-4c10-a5fc-803b56d528ae',
+        // 'sensei'     => '5af1f435-fc13-44ce-9731-f412f2b1ac5e',
         // Add more roles and their corresponding SendGrid list IDs
     ];
 
@@ -240,7 +240,7 @@ if (getenv('WP_ENV') !== 'development') {
     add_action('gform_after_submission', 'add_sendgrid_contact_via_gform', 10, 2);
     function add_sendgrid_contact_via_gform($entry, $form) {
         // Only proceed if the form ID is 7
-        if ($form['id'] != 7) {
+        if ($form['id'] != 1) {
             return;
         }
 
@@ -287,54 +287,54 @@ if (getenv('WP_ENV') !== 'development') {
     }
 
     // Add Accountability Partner to SendGrid list when a Gravity Forms form is submitted
-    add_action('gform_after_submission', 'add_accountability_partner_via_gform', 10, 2);
-    function add_accountability_partner_via_gform($entry, $form) {
-        // Only proceed if the form ID is 38
-        if ($form['id'] != 38) {
-            return;
-        }
-
-        // Fetch the email and username fields from the form entry
-        $email = rgar($entry, '1');
-        $username = rgar($entry, '3');
-
-        // Initialize SendGrid API key from WordPress options
-        $sendgridAPIKey = get_option('bonsai_ai_sendgrid_api_key');
-
-        // Initialize cURL
-        $curl = curl_init();
-
-        curl_setopt_array($curl, [
-            CURLOPT_URL => "https://api.sendgrid.com/v3/marketing/contacts",
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CUSTOMREQUEST => "PUT",
-            CURLOPT_POSTFIELDS => json_encode([
-                'list_ids' => ['cff9087c-fc83-4f1e-be57-fa4518ce5a2f'],
-                'contacts' => [
-                    [
-                        'email' => $email,
-                        'custom_fields' => [
-                            'w1_T' => 'Accountability Partner',
-                            'w2_T' => $username
-                        ]
-                    ]
-                ]
-            ]),
-            CURLOPT_HTTPHEADER => [
-                "authorization: Bearer $sendgridAPIKey",
-                "content-type: application/json"
-            ],
-        ]);
-
-        $response = curl_exec($curl);
-        $err = curl_error($curl);
-
-        curl_close($curl);
-
-        if ($err) {
-            error_log("cURL Error #:" . $err);
-        } else {
-            error_log("SendGrid Response: $response");
-        }
-    }
+    // add_action('gform_after_submission', 'add_accountability_partner_via_gform', 10, 2);
+    // function add_accountability_partner_via_gform($entry, $form) {
+    //     // Only proceed if the form ID is 38
+    //     if ($form['id'] != 38) {
+    //         return;
+    //     }
+    //
+    //     // Fetch the email and username fields from the form entry
+    //     $email = rgar($entry, '1');
+    //     $username = rgar($entry, '3');
+    //
+    //     // Initialize SendGrid API key from WordPress options
+    //     $sendgridAPIKey = get_option('bonsai_ai_sendgrid_api_key');
+    //
+    //     // Initialize cURL
+    //     $curl = curl_init();
+    //
+    //     curl_setopt_array($curl, [
+    //         CURLOPT_URL => "https://api.sendgrid.com/v3/marketing/contacts",
+    //         CURLOPT_RETURNTRANSFER => true,
+    //         CURLOPT_CUSTOMREQUEST => "PUT",
+    //         CURLOPT_POSTFIELDS => json_encode([
+    //             'list_ids' => ['cff9087c-fc83-4f1e-be57-fa4518ce5a2f'],
+    //             'contacts' => [
+    //                 [
+    //                     'email' => $email,
+    //                     'custom_fields' => [
+    //                         'w1_T' => 'Accountability Partner',
+    //                         'w2_T' => $username
+    //                     ]
+    //                 ]
+    //             ]
+    //         ]),
+    //         CURLOPT_HTTPHEADER => [
+    //             "authorization: Bearer $sendgridAPIKey",
+    //             "content-type: application/json"
+    //         ],
+    //     ]);
+    //
+    //     $response = curl_exec($curl);
+    //     $err = curl_error($curl);
+    //
+    //     curl_close($curl);
+    //
+    //     if ($err) {
+    //         error_log("cURL Error #:" . $err);
+    //     } else {
+    //         error_log("SendGrid Response: $response");
+    //     }
+    // }
 }
