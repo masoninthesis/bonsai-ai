@@ -23,6 +23,9 @@ if ( ! defined( 'BONSAI_AI_PLUGIN_FILE' ) ) {
 }
 
 // Include the files
+// Apollo AI functionality
+require_once plugin_dir_path(__FILE__) . 'apollo.php';
+
 // Merge tags for Gravity Forms
 require_once plugin_dir_path( BONSAI_AI_PLUGIN_FILE ) . 'merge-tags.php';
 require_once plugin_dir_path( BONSAI_AI_PLUGIN_FILE ) . 'shortcodes.php';
@@ -88,7 +91,6 @@ require_once plugin_dir_path( __FILE__ ) . 'admin/admin-menu.php';
 // Include Sendgrid settings
 require_once plugin_dir_path( __FILE__ ) . 'admin/sendgrid-settings.php';
 
-
 // Cron Jobs
 require_once plugin_dir_path(__FILE__) . 'cron-jobs.php';
 setup_deshi_autoresponse_hooks(__FILE__);
@@ -100,3 +102,13 @@ function hide_field_for_logged_in_users() {
     }
 }
 add_action('wp_enqueue_scripts', 'hide_field_for_logged_in_users');
+
+// Apollo Javascript
+function apollo_ai_enqueue_scripts() {
+    // Define the path to the JavaScript file
+    $js_path = plugin_dir_url( __FILE__ ) . 'js/apollo.js';
+
+    // Enqueue the script
+    wp_enqueue_script( 'bonsai-ai-apollo', $js_path, array(), '1.0.0', true );
+}
+add_action( 'wp_enqueue_scripts', 'apollo_ai_enqueue_scripts' );
