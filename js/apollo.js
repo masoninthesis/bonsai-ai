@@ -46,16 +46,42 @@ function handleRecordingStop() {
     const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
     const audioFile = new File([audioBlob], "recording.webm", { type: 'audio/webm' });
 
-    uploadAudioFile(audioFile);
+    // Assuming your Gravity Form file input has an ID like 'input_4_3'
+    const fileInput = document.getElementById('input_4_3');
+    if (fileInput) {
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(audioFile);
+        fileInput.files = dataTransfer.files;
+    }
 }
 
-function uploadAudioFile(file) {
-    const formData = new FormData();
-    formData.append('file', file);
+function displayAudioFile(file, url) {
+    var recordButton = document.getElementById('recordButton');
 
-    // Additional code for uploading goes here
+    // Create an audio element
+    const audioElement = document.createElement('audio');
+    audioElement.controls = true;
+    audioElement.src = url;
+
+    // Create a download link
+    const downloadLink = document.createElement('a');
+    downloadLink.href = url;
+    downloadLink.download = file.name;
+    downloadLink.textContent = `Download ${file.name}`;
+    downloadLink.style.marginRight = '10px'; // Add some space between the buttons
+
+    // Create a save button
+    const saveButton = document.createElement('button');
+    saveButton.textContent = 'Save to Library';
+    saveButton.onclick = function() {
+        uploadAudioFile(file);
+    };
+
+    // Append the elements
+    recordButton.insertAdjacentElement('afterend', saveButton);
+    recordButton.insertAdjacentElement('afterend', downloadLink);
+    recordButton.insertAdjacentElement('afterend', audioElement);
 }
-
 
 function stopRecording() {
     console.log('Recording stopped');
@@ -68,14 +94,25 @@ function uploadAudioFile(file) {
     const formData = new FormData();
     formData.append('file', file);
 
+    const username = 'admin'; // Your WordPress username
+    const appPassword = 'Mn6q ZgLL rPDq 6cfL yEpv HGjc'.replace(/\s/g, ''); // Your application password with spaces removed
+
     fetch('/wp-json/wp/v2/media', {
         method: 'POST',
         body: formData,
         headers: {
-            'Authorization': 'Basic ' + btoa('admin:Mn6q ZgLL rPDq 6cfL yEpv HGjc')
+          'Authorization': 'Basic ' + btoa(username + ':' + appPassword),
+          'Content-Disposition': 'attachment; filename=recording.webm'
         }
     })
-    .then(response => response.json())
+
+    .then(response => {
+      if (!response.ok) {
+          throw new Error('Network response was not ok ' + response.statusText);
+      }
+      return response.json();
+    })
+
     .then(data => {
         console.log('Success:', data);
     })
