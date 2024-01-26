@@ -1,3 +1,5 @@
+console.log('apollo.js loaded');
+
 // Record Button Click
 document.addEventListener('DOMContentLoaded', function() {
     var recordButton = document.getElementById('recordButton');
