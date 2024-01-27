@@ -103,12 +103,16 @@ function hide_field_for_logged_in_users() {
 }
 add_action('wp_enqueue_scripts', 'hide_field_for_logged_in_users');
 
-// Apollo Javascript
+// Apollo and Bonsai JavaScript
 function apollo_ai_enqueue_scripts() {
-    // Define the path to the JavaScript file
-    $js_path = plugin_dir_url( __FILE__ ) . 'js/apollo.js';
+    // Define the path to the Apollo JavaScript file
+    $apollo_js_path = plugin_dir_url( __FILE__ ) . 'js/apollo.js';
+    // Enqueue the Apollo script
+    wp_enqueue_script( 'bonsai-ai-apollo', $apollo_js_path, array(), '1.0.0', true );
 
-    // Enqueue the script
-    wp_enqueue_script( 'bonsai-ai-apollo', $js_path, array(), '1.0.0', true );
+    // Define the path to the Bonsai JavaScript file
+    $bonsai_js_path = plugin_dir_url( __FILE__ ) . 'js/bonsai.js';
+    // Enqueue the Bonsai script
+    wp_enqueue_script( 'bonsai-ai-bonsai', $bonsai_js_path, array(), '1.0.0', true );
 }
 add_action( 'wp_enqueue_scripts', 'apollo_ai_enqueue_scripts' );
