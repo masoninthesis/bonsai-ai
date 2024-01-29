@@ -120,3 +120,26 @@ function uploadAudioFile(file) {
         console.error('Error:', error);
     });
 }
+
+// Save Recording Before Leaving Page Reminder
+let isFormChanged = false;
+
+// Function to mark the form as changed
+function markFormChanged() {
+    isFormChanged = true;
+}
+
+// Add event listeners to each input field in your form
+document.querySelectorAll('#gform_4 input, #gform_4 textarea, #gform_4 select').forEach(input => {
+    input.addEventListener('change', markFormChanged);
+});
+
+// Listen for the beforeunload event
+window.addEventListener('beforeunload', function (e) {
+    if (isFormChanged) {
+        // Customize this message as needed
+        var confirmationMessage = 'It looks like you have been editing something. If you leave before saving, your changes will be lost.';
+        (e || window.event).returnValue = confirmationMessage; // Gecko and Trident
+        return confirmationMessage; // Gecko and WebKit
+    }
+});
