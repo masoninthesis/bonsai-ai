@@ -1,6 +1,6 @@
 console.log('apollo.js loaded');
 
-// Record Button Click
+// Record Button Click and Animation
 document.addEventListener('DOMContentLoaded', function() {
     var recordButton = document.getElementById('recordButton');
 
@@ -8,15 +8,18 @@ document.addEventListener('DOMContentLoaded', function() {
         recordButton.addEventListener('click', function() {
             if (recordButton.textContent === 'Start Recording') {
                 recordButton.textContent = 'Stop Recording';
+                recordButton.classList.add('recording');
                 startRecording();
             } else {
                 recordButton.textContent = 'Start Recording';
+                recordButton.classList.remove('recording');
                 stopRecording();
             }
         });
     }
 });
 
+// Recording audio
 var mediaRecorder;
 var audioChunks = [];
 var audioStream;
