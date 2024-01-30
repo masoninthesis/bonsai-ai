@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Bonsai AI
  * Description: A WordPress plugin that adds AI functionalities such as Sensei AI, and SenseiOS
- * Version: 0.0.1-apollo-0.0.2
+ * Version: 0.0.1-apollo-0.0.3
  * Author: Jackalope Labs
  * Author URI: https://bonsai.so/
  */
@@ -96,12 +96,12 @@ require_once plugin_dir_path(__FILE__) . 'cron-jobs.php';
 setup_deshi_autoresponse_hooks(__FILE__);
 
 // Sensei Upgrade: Sensei upgrade password field is hidden if deshi user is already logged in
-function hide_field_for_logged_in_users() {
-    if (is_user_logged_in()) {
-        wp_enqueue_script('hide-form-field', plugins_url('/js/sensei.js', __FILE__), array('jquery'), null, true);
-    }
-}
-add_action('wp_enqueue_scripts', 'hide_field_for_logged_in_users');
+// function hide_field_for_logged_in_users() {
+//     if (is_user_logged_in()) {
+//         wp_enqueue_script('hide-form-field', plugins_url('/js/sensei.js', __FILE__), array('jquery'), null, true);
+//     }
+// }
+// add_action('wp_enqueue_scripts', 'hide_field_for_logged_in_users');
 
 // Apollo and Bonsai JavaScript
 function apollo_ai_enqueue_scripts() {

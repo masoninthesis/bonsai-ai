@@ -121,25 +121,44 @@ function uploadAudioFile(file) {
     });
 }
 
-// Save Recording Before Leaving Page Reminder
-let isFormChanged = false;
+// Note filtering
+document.addEventListener('DOMContentLoaded', function() {
+    var searchInput = document.getElementById('searchInput');
 
-// Function to mark the form as changed
-function markFormChanged() {
-    isFormChanged = true;
-}
+    searchInput.addEventListener('keyup', function() {
+        var searchTerm = searchInput.value.toLowerCase();
+        var notes = document.querySelectorAll('.note-item');
 
-// Add event listeners to each input field in your form
-document.querySelectorAll('#gform_4 input, #gform_4 textarea, #gform_4 select').forEach(input => {
-    input.addEventListener('change', markFormChanged);
+        notes.forEach(function(note) {
+            var title = note.getAttribute('data-title');
+            if (title.indexOf(searchTerm) > -1) {
+                note.style.display = '';
+            } else {
+                note.style.display = 'none';
+            }
+        });
+    });
 });
 
-// Listen for the beforeunload event
-window.addEventListener('beforeunload', function (e) {
-    if (isFormChanged) {
-        // Customize this message as needed
-        var confirmationMessage = 'It looks like you have been editing something. If you leave before saving, your changes will be lost.';
-        (e || window.event).returnValue = confirmationMessage; // Gecko and Trident
-        return confirmationMessage; // Gecko and WebKit
-    }
-});
+// This section should stop a user from exiting without saving their recording
+// // Save Recording Before Leaving Page Reminder
+// let isFormChanged = false;
+//
+// // Function to mark the form as changed
+// function markFormChanged() {
+//     isFormChanged = true;
+// }
+// // Add event listeners to each input field in your form
+// document.querySelectorAll('#gform_4 input, #gform_4 textarea, #gform_4 select').forEach(input => {
+//     input.addEventListener('change', markFormChanged);
+// });
+//
+// // Listen for the beforeunload event
+// window.addEventListener('beforeunload', function (e) {
+//     if (isFormChanged) {
+//         // Customize this message as needed
+//         var confirmationMessage = 'It looks like you have been editing something. If you leave before saving, your changes will be lost.';
+//         (e || window.event).returnValue = confirmationMessage; // Gecko and Trident
+//         return confirmationMessage; // Gecko and WebKit
+//     }
+// });
