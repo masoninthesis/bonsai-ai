@@ -1,6 +1,40 @@
 <?php
 // This file handles functionality related to Gravity Forms merge tags
+// Apollo Merge Tags
+add_filter('gform_custom_merge_tags', 'register_custom_merge_tag', 10, 4);
+function register_custom_merge_tag($merge_tags, $form_id, $fields, $element_id) {
+    // Only add for form ID 4; adjust as needed
+    if ($form_id == 4) {
+        $merge_tags[] = array(
+            'label' => 'New Note Link', // Label for your custom merge tag
+            'tag' => '{new_note_link}', // The merge tag itself
+        );
+    }
+    return $merge_tags;
+}
 
+add_filter('gform_replace_merge_tags', 'replace_custom_note_link_merge_tag', 10, 7);
+function replace_custom_note_link_merge_tag($text, $form, $entry, $url_encode, $esc_html, $nl2br, $format) {
+    // Before accessing $form['id'], ensure $form is an array and has the 'id' key
+    if (!is_array($form) || !isset($form['id']) || $form['id'] != 4) {
+        return $text; // It's not the correct form or $form is not as expected, so just return $text
+    }
+
+    // Assuming you've stored the new note's details somewhere accessible
+    $post_id = get_post_meta($entry['id'], 'gf_new_note_post_id', true);
+    if($post_id) {
+        $post_url = get_permalink($post_id);
+        $post_title = get_the_title($post_id);
+        $new_note_link = "<a href='" . esc_url($post_url) . "'>" . esc_html($post_title) . "</a>";
+
+        // Replace the custom merge tag with the actual link
+        $text = str_replace('{new_note_link}', $new_note_link, $text);
+    }
+
+    return $text;
+}
+
+// Bonsai Merge Tags
 // Current Post ID
 add_filter('gform_custom_merge_tags', 'add_custom_merge_tag', 10, 4);
 function add_custom_merge_tag($merge_tags, $form_id, $fields, $element_id) {
