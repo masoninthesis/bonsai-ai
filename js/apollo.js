@@ -3,17 +3,21 @@ console.log('apollo.js loaded');
 // Record Button Click and Animation
 document.addEventListener('DOMContentLoaded', function() {
     var recordButton = document.getElementById('recordButton');
+    var formContainer = document.getElementById('gravityFormContainer');
+    var hasBeenRecorded = false;
 
     if (recordButton) {
         recordButton.addEventListener('click', function() {
             if (recordButton.textContent === 'Start Recording') {
                 recordButton.textContent = 'Stop Recording';
-                recordButton.classList.add('recording');
+                recordButton.classList.add('recording'); // Add the class to start blinking
                 startRecording();
-            } else {
+                hasBeenRecorded = true;
+            } else if (hasBeenRecorded) {
                 recordButton.textContent = 'Start Recording';
-                recordButton.classList.remove('recording');
+                recordButton.classList.remove('recording'); // Remove the class to stop blinking
                 stopRecording();
+                formContainer.style.display = 'block';
             }
         });
     }
@@ -142,6 +146,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+
 
 // This section should stop a user from exiting without saving their recording
 // // Save Recording Before Leaving Page Reminder

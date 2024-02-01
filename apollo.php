@@ -65,3 +65,32 @@ function handle_openai_response($entry, $form) {
         'post_content' => $updated_content
     ));
 }
+
+// Handle the File Upload and Save URL to Post Meta
+add_action('gform_after_submission_4', 'create_custom_note_page', 10, 2);
+function create_custom_note_page($entry, $form) {
+    $fileupload_field_id = '3';  // ID of the File Upload field
+    $title_field_id = '1';  // ID of the Field for the Post Title
+
+    // Get the title from the form entry
+    $post_title = rgar($entry, $title_field_id);
+
+    // Create a new post with the title from the form
+    $new_post = array(
+        'post_title'    => sanitize_text_field($post_title), // Sanitize the title
+        'post_content'  => '', // Default content, can be modified as needed
+        'post_status'   => 'publish', // Or 'draft', 'pending', etc.
+        'post_type'     => 'notes' // Your custom post type
+    );
+
+    // Insert the post and get the new post ID
+    $post_id = wp_insert_post($new_post);
+
+    // Check for file upload and update post meta
+    if (!empty($entry[$fileupload_field_id])) {
+        $file_url = $entry[$fileupload_field_id];
+        update_post_meta($post_id, 'uploaded_file_url', $file_url);
+    } else {
+        error_log('No file URL found for entry in Gravity Forms form ID 4.');
+    }
+}
