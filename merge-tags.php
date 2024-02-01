@@ -1,6 +1,26 @@
 <?php
 // This file handles functionality related to Gravity Forms merge tags
 
+// Current Post ID
+add_filter('gform_custom_merge_tags', 'add_custom_merge_tag', 10, 4);
+function add_custom_merge_tag($merge_tags, $form_id, $fields, $element_id) {
+    // Only add for form ID 5; remove the conditional to add to all forms
+    if ($form_id == 5) {
+        $merge_tags[] = array(
+            'label' => 'Current Post ID',
+            'tag'   => '{current_post_id}'
+        );
+    }
+    return $merge_tags;
+}
+
+add_filter('gform_replace_merge_tags', 'replace_custom_merge_tag', 10, 7);
+function replace_custom_merge_tag($text, $form, $entry, $url_encode, $esc_html, $nl2br, $format) {
+    $current_post_id = get_the_ID();
+    return str_replace('{current_post_id}', $current_post_id, $text);
+}
+
+
 // Grab post titles by category and create a merge tag to list them in GF
 add_filter('gform_replace_merge_tags', 'replace_all_posts_merge_tag', 10, 7);
 
