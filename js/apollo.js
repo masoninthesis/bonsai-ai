@@ -6,95 +6,102 @@ document.addEventListener('DOMContentLoaded', function() {
     var formContainer = document.getElementById('gravityFormContainer');
     var hasBeenRecorded = false;
 
-    if (recordButton) {
+    // Ensure mediaRecorder is accessible in the broader scope
+    var mediaRecorder;
+    var audioChunks = [];
+
+    if (recordButton && formContainer) {
         recordButton.addEventListener('click', function() {
             if (recordButton.textContent === 'Start Recording') {
                 recordButton.textContent = 'Stop Recording';
-                recordButton.classList.add('recording'); // Add the class to start blinking
+                recordButton.classList.add('recording');
                 startRecording();
-                hasBeenRecorded = true;
-            } else if (hasBeenRecorded) {
+            } else {
                 recordButton.textContent = 'Start Recording';
-                recordButton.classList.remove('recording'); // Remove the class to stop blinking
+                recordButton.classList.remove('recording');
                 stopRecording();
-                formContainer.style.display = 'block';
+                hasBeenRecorded = true;
+                // Toggle form visibility using CSS classes
+                formContainer.classList.remove('hidden');
+                formContainer.classList.add('visible');
             }
         });
     }
+
+    function startRecording() {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                audioChunks = []; // Initialize or clear existing chunks
+                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' }); // Adjust MIME type as needed
+                mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+                mediaRecorder.onstop = handleRecordingStop; // Correctly place inside startRecording
+                mediaRecorder.start();
+                console.log('Recording started');
+            })
+            .catch(error => console.error('Error accessing the microphone:', error));
+    }
+
+    function stopRecording() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop(); // Stop the media recorder
+            console.log('Stop recording called');
+
+            // Assuming mediaRecorder was created with a stream
+            // Stop each track on the stream
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+
+            if (hasBeenRecorded) {
+                // Toggle form visibility using CSS classes
+                formContainer.classList.remove('hidden');
+                formContainer.classList.add('visible');
+            }
+        }
+    }
+
+    function handleRecordingStop() {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const fileName = `recording_${new Date().toISOString()}.webm`; // Generate a file name
+        const file = new File([audioBlob], fileName, { type: 'audio/webm' });
+
+        attachFileToInput(file);
+        createDownloadLink(audioUrl, fileName); // Adjust to create a download hyperlink
+    }
+
+    function attachFileToInput(file) {
+        const fileInput = document.getElementById('input_4_3');
+        if (fileInput) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+            console.log('File successfully attached to input');
+        } else {
+            console.error('File input not found');
+            // Fallback or additional handling as needed
+        }
+    }
+
+    function createDownloadLink(audioUrl, fileName) {
+        let downloadLink = document.getElementById('downloadLink');
+        if (!downloadLink) {
+            downloadLink = document.createElement('a');
+            downloadLink.id = 'downloadLink';
+            downloadLink.href = audioUrl;
+            downloadLink.download = fileName; // Use the dynamically generated file name
+            // Set inner HTML to include "Download" text with icon and styling
+            downloadLink.innerHTML = '<small class="text-secondary pl-3"><i class="fas fa-download mr-2"></i> Download Recording</small>';
+            document.getElementById('recordButton').insertAdjacentElement('afterend', downloadLink);
+        } else {
+            // Update the link if it already exists
+            downloadLink.href = audioUrl;
+            downloadLink.download = fileName; // Update the filename as well
+        }
+
+        // Ensure the link is always visible after recording stops
+        downloadLink.style.display = 'inline'; // Adjust as necessary for your layout
+    }
+
 });
-
-// Recording audio
-var mediaRecorder;
-var audioChunks = [];
-var audioStream;
-
-function startRecording() {
-    console.log('Recording started');
-
-    navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(stream => {
-            audioStream = stream;
-            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-            mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
-            mediaRecorder.onstop = handleRecordingStop;
-            mediaRecorder.start();
-        })
-        .catch(error => {
-            console.error('Error accessing the microphone', error);
-            alert('Microphone access denied. Please allow microphone access to record audio.');
-            var recordButton = document.getElementById('recordButton');
-            if (recordButton) {
-                recordButton.textContent = 'Start Recording';
-            }
-        });
-}
-
-function handleRecordingStop() {
-    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-    const audioFile = new File([audioBlob], "recording.webm", { type: 'audio/webm' });
-
-    // Assuming your Gravity Form file input has an ID like 'input_4_3'
-    const fileInput = document.getElementById('input_4_3');
-    if (fileInput) {
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(audioFile);
-        fileInput.files = dataTransfer.files;
-    }
-}
-
-function displayAudioFile(file, url) {
-    var recordButton = document.getElementById('recordButton');
-
-    // Create an audio element
-    const audioElement = document.createElement('audio');
-    audioElement.controls = true;
-    audioElement.src = url;
-
-    // Create a download link
-    const downloadLink = document.createElement('a');
-    downloadLink.href = url;
-    downloadLink.download = file.name;
-    downloadLink.textContent = `Download ${file.name}`;
-    downloadLink.style.marginRight = '10px'; // Add some space between the buttons
-
-    // Create a save button
-    const saveButton = document.createElement('button');
-    saveButton.textContent = 'Save to Library';
-    saveButton.onclick = function() {
-        uploadAudioFile(file);
-    };
-
-    // Append the elements
-    recordButton.insertAdjacentElement('afterend', saveButton);
-    recordButton.insertAdjacentElement('afterend', downloadLink);
-    recordButton.insertAdjacentElement('afterend', audioElement);
-}
-
-function stopRecording() {
-    console.log('Recording stopped');
-    mediaRecorder.stop();
-    audioStream.getTracks().forEach(track => track.stop());
-}
 
 // Upload the File Using WP-API
 function uploadAudioFile(file) {
@@ -146,28 +153,3 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
-
-
-
-// This section should stop a user from exiting without saving their recording
-// // Save Recording Before Leaving Page Reminder
-// let isFormChanged = false;
-//
-// // Function to mark the form as changed
-// function markFormChanged() {
-//     isFormChanged = true;
-// }
-// // Add event listeners to each input field in your form
-// document.querySelectorAll('#gform_4 input, #gform_4 textarea, #gform_4 select').forEach(input => {
-//     input.addEventListener('change', markFormChanged);
-// });
-//
-// // Listen for the beforeunload event
-// window.addEventListener('beforeunload', function (e) {
-//     if (isFormChanged) {
-//         // Customize this message as needed
-//         var confirmationMessage = 'It looks like you have been editing something. If you leave before saving, your changes will be lost.';
-//         (e || window.event).returnValue = confirmationMessage; // Gecko and Trident
-//         return confirmationMessage; // Gecko and WebKit
-//     }
-// });
