@@ -79,11 +79,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function handleRecordingStop() {
         // Use the MIME type from mediaRecorder or a default
-        const mimeType = mediaRecorder.mimeType || 'audio/mp4';
-        const audioBlob = new Blob(audioChunks, { type: mimeType });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const fileName = `recording_${new Date().toISOString()}.${mimeType.split('/')[1]}`; // Dynamic extension based on MIME
-        const file = new File([audioBlob], fileName, { type: mimeType });
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        // Use a timestamp or another method to generate a unique filename without codec information
+        const fileName = `recording_${new Date().toISOString().split('.')[0].replace(/:/g, '-')}.webm`;
+        const file = new File([audioBlob], fileName, { type: 'audio/webm' });
 
         attachFileToInput(file);
         createDownloadLink(audioUrl, fileName);
@@ -98,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('File successfully attached to input');
         } else {
             console.error('File input not found');
-            // Fallback or additional handling as needed
+            // Handle the error or fallback scenario
         }
     }
 
@@ -125,17 +124,17 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Safari not yet supported
-document.addEventListener('DOMContentLoaded', function() {
-    var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-
-    if (isSafari) {
-        var warningContainer = document.getElementById('safari-warning-container');
-        var alertDiv = document.createElement('div');
-        alertDiv.className = 'alert alert-warning';
-        alertDiv.textContent = 'If using Safari, download the note after recording stops, and select Choose File to attach it– or use a different browser to remove this step';
-        warningContainer.appendChild(alertDiv);
-    }
-});
+// document.addEventListener('DOMContentLoaded', function() {
+//     var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+//
+//     if (isSafari) {
+//         var warningContainer = document.getElementById('safari-warning-container');
+//         var alertDiv = document.createElement('div');
+//         alertDiv.className = 'alert alert-warning';
+//         alertDiv.textContent = 'If using Safari, download the note after recording stops, and select Choose File to attach it– or use a different browser to remove this step';
+//         warningContainer.appendChild(alertDiv);
+//     }
+// });
 
 // Upload the File Using WP-API
 function uploadAudioFile(file) {
