@@ -31,14 +31,28 @@ document.addEventListener('DOMContentLoaded', function() {
     function startRecording() {
         navigator.mediaDevices.getUserMedia({ audio: true })
             .then(stream => {
-                audioChunks = []; // Initialize or clear existing chunks
-                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' }); // Adjust MIME type as needed
-                mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
-                mediaRecorder.onstop = handleRecordingStop; // Correctly place inside startRecording
-                mediaRecorder.start();
-                console.log('Recording started');
+                try {
+                    mediaRecorder = new MediaRecorder(stream);
+
+                    mediaRecorder.ondataavailable = handleDataAvailable;
+                    mediaRecorder.onstop = handleRecordingStop;
+
+                    mediaRecorder.start();
+                    console.log('Recording started without specifying MIME type');
+                } catch (error) {
+                    console.error('Error initializing MediaRecorder:', error);
+                }
             })
-            .catch(error => console.error('Error accessing the microphone:', error));
+            .catch(error => {
+                console.error('Error accessing the microphone:', error);
+            });
+    }
+
+
+    function handleDataAvailable(event) {
+        if (event.data.size > 0) {
+            audioChunks.push(event.data);
+        }
     }
 
     function stopRecording() {
@@ -46,26 +60,33 @@ document.addEventListener('DOMContentLoaded', function() {
             mediaRecorder.stop(); // Stop the media recorder
             console.log('Stop recording called');
 
-            // Assuming mediaRecorder was created with a stream
-            // Stop each track on the stream
+            // Stop each track on the stream to release the microphone
             mediaRecorder.stream.getTracks().forEach(track => track.stop());
 
-            if (hasBeenRecorded) {
-                // Toggle form visibility using CSS classes
-                formContainer.classList.remove('hidden');
-                formContainer.classList.add('visible');
-            }
+            // This flag 'hasBeenRecorded' might need to be set true here instead,
+            // if its purpose is to track whether recording has occurred at all for session
+            hasBeenRecorded = true;
+
+            // Show the form container after stopping the recording
+            // This adjustment ensures the form is displayed after the first recording session completes
+            formContainer.classList.remove('hidden');
+            formContainer.classList.add('visible');
+        } else {
+            console.log('MediaRecorder not in recording state or undefined');
         }
     }
 
+
     function handleRecordingStop() {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        // Use the MIME type from mediaRecorder or a default
+        const mimeType = mediaRecorder.mimeType || 'audio/mp4';
+        const audioBlob = new Blob(audioChunks, { type: mimeType });
         const audioUrl = URL.createObjectURL(audioBlob);
-        const fileName = `recording_${new Date().toISOString()}.webm`; // Generate a file name
-        const file = new File([audioBlob], fileName, { type: 'audio/webm' });
+        const fileName = `recording_${new Date().toISOString()}.${mimeType.split('/')[1]}`; // Dynamic extension based on MIME
+        const file = new File([audioBlob], fileName, { type: mimeType });
 
         attachFileToInput(file);
-        createDownloadLink(audioUrl, fileName); // Adjust to create a download hyperlink
+        createDownloadLink(audioUrl, fileName);
     }
 
     function attachFileToInput(file) {
@@ -101,6 +122,19 @@ document.addEventListener('DOMContentLoaded', function() {
         downloadLink.style.display = 'inline'; // Adjust as necessary for your layout
     }
 
+});
+
+// Safari not yet supported
+document.addEventListener('DOMContentLoaded', function() {
+    var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+    if (isSafari) {
+        var warningContainer = document.getElementById('safari-warning-container');
+        var alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-warning';
+        alertDiv.textContent = 'If using Safari, download the note after recording stops, and select Choose File to attach it– or use a different browser to remove this step';
+        warningContainer.appendChild(alertDiv);
+    }
 });
 
 // Upload the File Using WP-API
