@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Bonsai AI
  * Description: A WordPress plugin that adds AI functionalities such as Sensei AI, and SenseiOS
- * Version: 0.0.1-apollo-0.0.10
+ * Version: 0.0.1-apollo-0.0.11
  * Author: Jackalope Labs
  * Author URI: https://bonsai.so/
  */
@@ -25,6 +25,7 @@ if ( ! defined( 'BONSAI_AI_PLUGIN_FILE' ) ) {
 // Include the files
 // Apollo AI functionality
 require_once plugin_dir_path(__FILE__) . 'apollo.php';
+require_once plugin_dir_path(__FILE__) . 'deepgram.php';
 
 // Merge tags for Gravity Forms
 require_once plugin_dir_path( BONSAI_AI_PLUGIN_FILE ) . 'merge-tags.php';
