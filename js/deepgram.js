@@ -18,12 +18,12 @@ jQuery(document).ready(function($) {
             },
             success: function(response) {
                 console.log('AJAX request completed successfully.');
-                if(response.success) {
-                    console.log('Transcription Success:', response.data);
-                    // Handle success, display the transcription result
+                if(response.success && response.data && response.data.transcript) {
+                    console.log('Transcription Success:', response.data.transcript);
+                    $('#transcriptionResult').text(response.data.transcript); // Update text
                 } else {
                     console.error('Transcription Error:', response.data);
-                    // Handle failure
+                    $('#transcriptionResult').text('Error: Transcription failed.'); // Update with error message
                 }
             },
             error: function(error) {
