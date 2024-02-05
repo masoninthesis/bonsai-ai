@@ -20,10 +20,16 @@ jQuery(document).ready(function($) {
                 console.log('AJAX request completed successfully.');
                 if(response.success && response.data && response.data.transcript) {
                     console.log('Transcription Success:', response.data.transcript);
-                    $('#transcriptionResult').text(response.data.transcript); // Update text
+
+                    // Update the transcription result display
+                    $('#transcriptionResult').text(response.data.transcript);
+
+                    // Populate the transcription into the form input
+                    $('#input_5_1').val(response.data.transcript);
+
                 } else {
                     console.error('Transcription Error:', response.data);
-                    $('#transcriptionResult').text('Error: Transcription failed.'); // Update with error message
+                    $('#transcriptionResult').text('Error: Transcription failed.');
                 }
             },
             error: function(error) {
