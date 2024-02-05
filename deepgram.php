@@ -10,30 +10,19 @@ add_action('wp_ajax_nopriv_transcribe_audio', 'handle_transcription');
 
 function handle_transcription() {
     // The audio URL you want to transcribe
-    $audio_url = 'https://staging.apollohealthmd.com/app/uploads/gravity_forms/4-7f177ef23b77d6fa5d6c869ca01029d1/2024/02/recording_2024-02-03T23-44-16.webm';
-
-    // Set up Deepgram API request with nova-2 model and smart formatting
-    $api_key = '4dd9c6d653be146851fb17c19d6e7b457da4ac85'; // Use your actual Deepgram API key
-    $deepgram_url = 'https://api.deepgram.com/v1/listen';
-    $request_body = array(
-        'url' => $audio_url,
-        'model' => 'nova-2',
-        'language' => 'en-US',
-        'smart_format' => true
-    );
+    $audio_url = 'https://staging.apollohealthmd.com/app/uploads/gravity_forms/4-7f177ef23b77d6fa5d6c869ca01029d1/2024/02/recording_2024-02-05T07-43-23.webm';
+    $api_key = '4dd9c6d653be146851fb17c19d6e7b457da4ac85';
+    // Include query parameters directly in the URL
+    $deepgram_url = 'https://api.deepgram.com/v1/listen?smart_format=true&model=nova-2&language=en-US';
 
     $response = wp_remote_post($deepgram_url, array(
-        'method' => 'POST',
-        'timeout' => 45,
-        'redirection' => 5,
-        'httpversion' => '1.0',
-        'blocking' => true,
-        'headers' => array(
-            'Authorization' => 'Token ' . $api_key,
-            'Content-Type' => 'application/json',
-        ),
-        'body' => json_encode($request_body),
-        'cookies' => array()
+       'method' => 'POST',
+       'timeout' => 45,
+       'headers' => array(
+           'Authorization' => 'Token ' . $api_key,
+           'Content-Type' => 'application/json',
+       ),
+       'body' => json_encode(array('url' => $audio_url)),
     ));
 
     if (is_wp_error($response)) {
