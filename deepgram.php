@@ -10,7 +10,18 @@ add_action('wp_ajax_nopriv_transcribe_audio', 'handle_transcription');
 
 function handle_transcription() {
     // The audio URL you want to transcribe
-    $audio_url = 'https://staging.apollohealthmd.com/app/uploads/gravity_forms/4-7f177ef23b77d6fa5d6c869ca01029d1/2024/02/recording_2024-02-05T07-43-23.webm';
+    if (!isset($_POST['post_id'])) {
+        wp_send_json_error('Post ID not provided');
+        return;
+    }
+
+    $post_id = sanitize_text_field($_POST['post_id']);
+    $audio_url = get_post_meta($post_id, 'uploaded_file_url', true);
+
+    if (empty($audio_url)) {
+        wp_send_json_error('No audio URL found for post ID: ' . $post_id);
+        return;
+    }
     $api_key = '4dd9c6d653be146851fb17c19d6e7b457da4ac85';
     // Include query parameters directly in the URL
     $deepgram_url = 'https://api.deepgram.com/v1/listen?smart_format=true&model=nova-2&language=en-US';
