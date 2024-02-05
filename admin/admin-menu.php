@@ -29,6 +29,15 @@ function bonsai_ai_admin_menu() {
         'bonsai_ai_sendgrid',      // Menu slug
         'bonsai_ai_sendgrid_page'  // Callback function
     );
+    // Create Deepgram Settings submenu
+    add_submenu_page(
+        'bonsai_ai',               // Parent slug
+        'Deepgram Settings',       // Page title
+        'Deepgram Settings',       // Menu title
+        'manage_options',          // Capability
+        'bonsai_ai_deepgram',      // Menu slug
+        'bonsai_ai_deepgram_page'  // Callback function for rendering the settings page
+    );
 }
 add_action('admin_menu', 'bonsai_ai_admin_menu');
 

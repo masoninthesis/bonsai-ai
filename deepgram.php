@@ -17,12 +17,13 @@ function handle_transcription() {
 
     $post_id = sanitize_text_field($_POST['post_id']);
     $audio_url = get_post_meta($post_id, 'uploaded_file_url', true);
+    // $audio_url = 'https://staging.apollohealthmd.com/app/uploads/gravity_forms/4-7f177ef23b77d6fa5d6c869ca01029d1/2024/02/recording_2024-02-05T08-31-17.webm';
 
     if (empty($audio_url)) {
         wp_send_json_error('No audio URL found for post ID: ' . $post_id);
         return;
     }
-    $api_key = '4dd9c6d653be146851fb17c19d6e7b457da4ac85';
+    $api_key = get_option('bonsai_ai_deepgram_api_key');
     // Include query parameters directly in the URL
     $deepgram_url = 'https://api.deepgram.com/v1/listen?smart_format=true&model=nova-2&language=en-US';
 
