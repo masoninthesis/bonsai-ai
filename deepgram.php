@@ -45,14 +45,15 @@ function handle_transcription() {
     }
 
     $body = wp_remote_retrieve_body($response);
+    error_log('Full Deepgram Response: ' . $body); // Log the raw JSON response
     $transcription = json_decode($body, true);
 
     if (isset($transcription['results']) && !empty($transcription['results'])) {
-        // Log successful transcription to PHP error log
-        error_log('Transcription Success: ' . print_r($transcription['results'], true));
-        wp_send_json_success($transcription['results']);
+        // Assuming the first channel and first alternative is what we want.
+        $transcriptText = $transcription['results']['channels'][0]['alternatives'][0]['transcript'];
+        error_log('Transcription Success: ' . $transcriptText);
+        wp_send_json_success(array('transcript' => $transcriptText));
     } else {
-        // Log failure to transcribe audio
         error_log('Failed to transcribe audio: ' . print_r($transcription, true));
         wp_send_json_error('Failed to transcribe audio');
     }
