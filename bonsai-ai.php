@@ -117,3 +117,11 @@ function apollo_ai_enqueue_scripts() {
     wp_enqueue_script( 'bonsai-ai-bonsai', $bonsai_js_path, array(), '1.0.0', true );
 }
 add_action( 'wp_enqueue_scripts', 'apollo_ai_enqueue_scripts' );
+
+// AJAX and Deepgram
+function deepgram_enqueue_scripts() {
+    wp_enqueue_script('bonsai-ai-script', plugin_dir_url(__FILE__) . 'js/deepgram.js', array('jquery'), null, true);
+    wp_localize_script('bonsai-ai-script', 'bonsaiAiAjax', array('ajaxurl' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('transcribe_audio_nonce')));
+}
+
+add_action('wp_enqueue_scripts', 'deepgram_enqueue_scripts');
