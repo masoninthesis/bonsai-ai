@@ -137,36 +137,36 @@ document.addEventListener('DOMContentLoaded', function() {
 // });
 
 // Upload the File Using WP-API
-function uploadAudioFile(file) {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const username = 'admin'; // Your WordPress username
-    const appPassword = 'Mn6q ZgLL rPDq 6cfL yEpv HGjc'.replace(/\s/g, ''); // Your application password with spaces removed
-
-    fetch('/wp-json/wp/v2/media', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Authorization': 'Basic ' + btoa(username + ':' + appPassword),
-          'Content-Disposition': 'attachment; filename=recording.webm'
-        }
-    })
-
-    .then(response => {
-      if (!response.ok) {
-          throw new Error('Network response was not ok ' + response.statusText);
-      }
-      return response.json();
-    })
-
-    .then(data => {
-        console.log('Success:', data);
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-    });
-}
+// function uploadAudioFile(file) {
+//     const formData = new FormData();
+//     formData.append('file', file);
+//
+//     const username = 'admin'; // Your WordPress username
+//     const appPassword = 'Mn6q ZgLL rPDq 6cfL yEpv HGjc'.replace(/\s/g, ''); // Your application password with spaces removed
+//
+//     fetch('/wp-json/wp/v2/media', {
+//         method: 'POST',
+//         body: formData,
+//         headers: {
+//           'Authorization': 'Basic ' + btoa(username + ':' + appPassword),
+//           'Content-Disposition': 'attachment; filename=recording.webm'
+//         }
+//     })
+//
+//     .then(response => {
+//       if (!response.ok) {
+//           throw new Error('Network response was not ok ' + response.statusText);
+//       }
+//       return response.json();
+//     })
+//
+//     .then(data => {
+//         console.log('Success:', data);
+//     })
+//     .catch((error) => {
+//         console.error('Error:', error);
+//     });
+// }
 
 // Note filtering
 document.addEventListener('DOMContentLoaded', function() {

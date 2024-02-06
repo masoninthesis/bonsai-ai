@@ -64,6 +64,10 @@ function handle_openai_response($entry, $form) {
         'ID'           => $post_id,
         'post_content' => $updated_content
     ));
+
+    // Redirect to the updated post
+    wp_redirect(get_permalink($post_id));
+    exit;
 }
 
 // Handle the File Upload and Save URL to Post Meta
