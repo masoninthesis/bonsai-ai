@@ -2,6 +2,7 @@ console.log('deepgram.js loaded');
 
 // Deepgram transcription trigger
 jQuery(document).ready(function($) {
+    // Deepgram transcription trigger
     $('#transcribeAudio').click(function() {
         var postID = $(this).attr('data-post-id'); // Fetch the post ID
 

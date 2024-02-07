@@ -73,13 +73,9 @@ function handle_transcription() {
     }
 }
 
-// Note: Enqueuing scripts might not be necessary for this simplified version,
-// but you'll need it when integrating with the front-end.
-
-// This curl is working
-  // curl \
-  //   -X POST \
-  //   "https://api.deepgram.com/v1/listen?smart_format=true&model=nova-2&language=en-US" \
-  //   -H "Authorization: Token 4dd9c6d653be146851fb17c19d6e7b457da4ac85" \
-  //   -H 'content-type: application/json' \
-  //   -d '{"url":"https://staging.apollohealthmd.com/app/uploads/gravity_forms/4-7f177ef23b77d6fa5d6c869ca01029d1/2024/02/recording_2024-02-03T23-44-16.webm"}'
+// Working diarization curl
+// curl --request POST \
+//   --url 'https://api.deepgram.com/v1/listen?diarize=true&punctuate=true&utterances=true' \
+//   --header 'Authorization: Token api_key' \
+//   --header 'Content-Type: application/json' \
+//   --data '{"url":"https://staging.apollohealthmd.com/app/uploads/gravity_forms/4-7f177ef23b77d6fa5d6c869ca01029d1/2024/02/recording_2024-02-06T23-30-35.webm"}'
