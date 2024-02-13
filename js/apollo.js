@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 recordButton.classList.remove('recording');
                 stopRecording();
                 hasBeenRecorded = true;
-                // Toggle form visibility using CSS classes
                 formContainer.classList.remove('hidden');
                 formContainer.classList.add('visible');
             }
@@ -31,23 +30,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function startRecording() {
         navigator.mediaDevices.getUserMedia({ audio: true })
             .then(stream => {
-                try {
-                    mediaRecorder = new MediaRecorder(stream);
-
-                    mediaRecorder.ondataavailable = handleDataAvailable;
-                    mediaRecorder.onstop = handleRecordingStop;
-
-                    mediaRecorder.start();
-                    console.log('Recording started without specifying MIME type');
-                } catch (error) {
-                    console.error('Error initializing MediaRecorder:', error);
-                }
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = handleDataAvailable;
+                mediaRecorder.onstop = handleRecordingStop;
+                mediaRecorder.start();
             })
             .catch(error => {
                 console.error('Error accessing the microphone:', error);
             });
     }
-
 
     function handleDataAvailable(event) {
         if (event.data.size > 0) {
@@ -57,33 +48,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function stopRecording() {
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-            mediaRecorder.stop(); // Stop the media recorder
-            console.log('Stop recording called');
-
-            // Stop each track on the stream to release the microphone
+            mediaRecorder.stop();
             mediaRecorder.stream.getTracks().forEach(track => track.stop());
-
-            // This flag 'hasBeenRecorded' might need to be set true here instead,
-            // if its purpose is to track whether recording has occurred at all for session
             hasBeenRecorded = true;
-
-            // Show the form container after stopping the recording
-            // This adjustment ensures the form is displayed after the first recording session completes
             formContainer.classList.remove('hidden');
             formContainer.classList.add('visible');
-        } else {
-            console.log('MediaRecorder not in recording state or undefined');
         }
     }
 
-
     function handleRecordingStop() {
-        // Use the MIME type from mediaRecorder or a default
         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-        // Use a timestamp or another method to generate a unique filename without codec information
         const fileName = `recording_${new Date().toISOString().split('.')[0].replace(/:/g, '-')}.webm`;
         const file = new File([audioBlob], fileName, { type: 'audio/webm' });
-
+        const audioUrl = URL.createObjectURL(audioBlob);
         attachFileToInput(file);
         createDownloadLink(audioUrl, fileName);
     }
@@ -94,10 +71,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const dataTransfer = new DataTransfer();
             dataTransfer.items.add(file);
             fileInput.files = dataTransfer.files;
-            console.log('File successfully attached to input');
-        } else {
-            console.error('File input not found');
-            // Handle the error or fallback scenario
         }
     }
 
@@ -107,82 +80,58 @@ document.addEventListener('DOMContentLoaded', function() {
             downloadLink = document.createElement('a');
             downloadLink.id = 'downloadLink';
             downloadLink.href = audioUrl;
-            downloadLink.download = fileName; // Use the dynamically generated file name
-            // Set inner HTML to include "Download" text with icon and styling
+            downloadLink.download = fileName;
             downloadLink.innerHTML = '<small class="text-secondary pl-3"><i class="fas fa-download mr-2"></i> Download Recording</small>';
             document.getElementById('recordButton').insertAdjacentElement('afterend', downloadLink);
         } else {
-            // Update the link if it already exists
             downloadLink.href = audioUrl;
-            downloadLink.download = fileName; // Update the filename as well
+            downloadLink.download = fileName;
         }
-
-        // Ensure the link is always visible after recording stops
-        downloadLink.style.display = 'inline'; // Adjust as necessary for your layout
+        downloadLink.style.display = 'inline';
     }
-
 });
 
-// Safari not yet supported
-// document.addEventListener('DOMContentLoaded', function() {
-//     var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-//
-//     if (isSafari) {
-//         var warningContainer = document.getElementById('safari-warning-container');
-//         var alertDiv = document.createElement('div');
-//         alertDiv.className = 'alert alert-warning';
-//         alertDiv.textContent = 'If using Safari, download the note after recording stops, and select Choose File to attach it– or use a different browser to remove this step';
-//         warningContainer.appendChild(alertDiv);
-//     }
-// });
-
-// Upload the File Using WP-API
-// function uploadAudioFile(file) {
-//     const formData = new FormData();
-//     formData.append('file', file);
-//
-//     const username = 'admin'; // Your WordPress username
-//     const appPassword = 'Mn6q ZgLL rPDq 6cfL yEpv HGjc'.replace(/\s/g, ''); // Your application password with spaces removed
-//
-//     fetch('/wp-json/wp/v2/media', {
-//         method: 'POST',
-//         body: formData,
-//         headers: {
-//           'Authorization': 'Basic ' + btoa(username + ':' + appPassword),
-//           'Content-Disposition': 'attachment; filename=recording.webm'
-//         }
-//     })
-//
-//     .then(response => {
-//       if (!response.ok) {
-//           throw new Error('Network response was not ok ' + response.statusText);
-//       }
-//       return response.json();
-//     })
-//
-//     .then(data => {
-//         console.log('Success:', data);
-//     })
-//     .catch((error) => {
-//         console.error('Error:', error);
-//     });
-// }
-
-// Note filtering
+// JavaScript to Intercept GForm4 Submission
 document.addEventListener('DOMContentLoaded', function() {
-    var searchInput = document.getElementById('searchInput');
+    var form = document.querySelector('form#gform_4');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Form submission intercepted.');
+            var audioFileInput = document.getElementById('input_4_3');
+            var file = audioFileInput.files[0];
 
-    searchInput.addEventListener('keyup', function() {
-        var searchTerm = searchInput.value.toLowerCase();
-        var notes = document.querySelectorAll('.note-item');
-
-        notes.forEach(function(note) {
-            var title = note.getAttribute('data-title');
-            if (title.indexOf(searchTerm) > -1) {
-                note.style.display = '';
+            if (file) {
+                uploadAndTranscribeAudio(file, this);
             } else {
-                note.style.display = 'none';
+                console.error('No audio file found.');
+                // If no file, you might decide to submit the form or handle differently
             }
         });
-    });
+    }
 });
+
+// JavaScript Function to Upload and Transcribe Audio
+function uploadAndTranscribeAudio(file, form) {
+    var formData = new FormData();
+    formData.append('audio_file', file);
+
+    fetch(bonsaiAiParams.transcriptionHandlerUrl, {
+        method: 'POST',
+        body: formData,
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.transcription) {
+            var transcriptionField = document.getElementById('input_4_5');
+            transcriptionField.value = data.transcription;
+            form.submit(); // Directly submit the form without removing listeners
+        } else {
+            console.error('Transcription failed:', data.error);
+            // Handle failure: Show an error message or log it
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
