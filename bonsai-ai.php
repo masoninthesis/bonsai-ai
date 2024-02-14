@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Bonsai AI
  * Description: A WordPress plugin that adds AI functionalities such as Sensei AI, and SenseiOS
- * Version: 0.0.1-apollo-0.0.13.1
+ * Version: 0.0.1-apollo-0.0.14.1
  * Author: Jackalope Labs
  * Author URI: https://bonsai.so/
  */
@@ -118,10 +118,6 @@ function apollo_ai_enqueue_scripts() {
     $bonsai_js_path = plugin_dir_url( __FILE__ ) . 'js/bonsai.js';
     // Enqueue the Bonsai script
     wp_enqueue_script( 'bonsai-ai-bonsai', $bonsai_js_path, array(), '1.0.0', true );
-
-    // Pass the transcription handler URL to the Apollo script
-    $transcription_handler_url = plugin_dir_url( __FILE__ ) . 'transcription-handler.php';
-    wp_localize_script( 'bonsai-ai-apollo', 'bonsaiAiParams', array( 'transcriptionHandlerUrl' => $transcription_handler_url ) );
 }
 add_action( 'wp_enqueue_scripts', 'apollo_ai_enqueue_scripts' );
 
