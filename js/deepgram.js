@@ -28,6 +28,9 @@ jQuery(document).ready(function($) {
                     // Populate the transcription into the form input
                     $('#input_5_1').val(response.data.transcript);
 
+                    // Automatically submit the form containing the transcription input
+                    // Assuming '#input_5_1' is unique and directly within the form to be submitted
+                    $('#input_5_1').closest('form').submit();
                 } else {
                     console.error('Transcription Error:', response.data);
                     $('#transcriptionResult').text('Error: Transcription failed.');

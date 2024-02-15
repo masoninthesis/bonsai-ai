@@ -139,15 +139,16 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
                 transcribeButton.click();
                 console.log("Button click attempted after delay.");
-            }, 500); // Delay in milliseconds (1000ms = 1 second)
+            }, 500); // Delay in milliseconds (500ms = 0.5 second)
         } else {
             console.log("Transcribe button not found.");
         }
+        // Show the loading modal using jQuery in no-conflict mode
+        jQuery('#loadingModal').modal('show');
     } else {
         console.log("'transcribe' parameter not set to 'true'. No action taken.");
     }
 });
-
 
 // Safari not yet supported
 // document.addEventListener('DOMContentLoaded', function() {
