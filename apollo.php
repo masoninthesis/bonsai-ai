@@ -21,19 +21,97 @@ add_action('init', 'register_notes_cpt');
 
 // GF Form ID #4 reloads after submission
 // Redirect loads form again instead of confirmation message
-add_filter( 'gform_confirmation_4', 'note_confirmation', 10, 4 );
-function note_confirmation( $confirmation, $form, $entry, $ajax ) {
-    // Get the source URL and append a query parameter
-    $redirect_url = rgar( $entry, 'source_url' ) . '?form_submitted=true';
+// add_filter( 'gform_confirmation_4', 'note_confirmation', 10, 4 );
+// function note_confirmation( $confirmation, $form, $entry, $ajax ) {
+//     // Get the source URL and append a query parameter
+//     $redirect_url = rgar( $entry, 'source_url' ) . '?form_submitted=true';
+//
+//     // Set up the redirection
+//     $confirmation = array( 'redirect' => $redirect_url );
+//
+//     // Log the URL to which we're trying to redirect
+//     error_log( 'GravityForms Confirmation: Redirecting to ' . $redirect_url );
+//
+//     return $confirmation;
+// }
 
-    // Set up the redirection
-    $confirmation = array( 'redirect' => $redirect_url );
+// Handle the File Upload and Save URL to Post Meta
+add_action('gform_after_submission_4', 'create_custom_note_page', 10, 2);
+function create_custom_note_page($entry, $form) {
+    $fileupload_field_id = '3';  // ID of the File Upload field
+    $title_field_id = '1';  // ID of the Field for the Post Title
 
-    // Log the URL to which we're trying to redirect
-    error_log( 'GravityForms Confirmation: Redirecting to ' . $redirect_url );
+    // Get the title from the form entry
+    $post_title = rgar($entry, $title_field_id);
 
-    return $confirmation;
+    // Create a new post with the title from the form
+    $new_post = array(
+        'post_title'    => sanitize_text_field($post_title), // Sanitize the title
+        'post_content'  => '', // Default content, can be modified as needed
+        'post_status'   => 'publish', // Or 'draft', 'pending', etc.
+        'post_type'     => 'notes' // Your custom post type
+    );
+
+    // Insert the post and get the new post ID
+    $post_id = wp_insert_post($new_post);
+
+    // Check for file upload and update post meta
+    if (!empty($entry[$fileupload_field_id])) {
+        $file_url = $entry[$fileupload_field_id];
+        update_post_meta($post_id, 'uploaded_file_url', $file_url);
+    } else {
+        error_log('No file URL found for entry in Gravity Forms form ID 4.');
+    }
+
+    // redirect to new post
+    if ($post_id) {
+        gform_update_meta($entry['id'], 'my_custom_post_id', $post_id);
+        error_log('Custom Stored post ID: ' . $post_id);
+
+        // Immediate redirection to the newly created post
+        $redirect_url = get_permalink($post_id);
+        error_log('Redirecting to: ' . $redirect_url);
+        wp_redirect($redirect_url);
+        exit;
+    }
 }
+
+// add_action('gform_after_submission', function ($entry, $form) {
+//     if ($form['id'] != 4) return;
+//
+//     $post_id = wp_insert_post([
+//         'post_title'    => rgar($entry, '1'), // Assuming field ID 1 is the title
+//         'post_content'  => 'SOAP Note here',
+//         'post_status'   => 'publish',
+//         'post_type'     => 'notes', // Replace with your custom post type
+//     ]);
+//
+//     if ($post_id) {
+//         gform_update_meta($entry['id'], 'my_custom_post_id', $post_id);
+//         error_log('Custom Stored post ID: ' . $post_id);
+//
+//         // Immediate redirection to the newly created post
+//         $redirect_url = get_permalink($post_id);
+//         error_log('Redirecting to: ' . $redirect_url);
+//         wp_redirect($redirect_url);
+//         exit;
+//     }
+// }, 10, 2);
+
+// add_filter('gform_confirmation', 'redirect_to_new_post', 10, 4);
+// function redirect_to_new_post($confirmation, $form, $entry, $ajax) {
+//     error_log('Attempting to retrieve post ID for redirection.');
+//     if ($form['id'] == '4') {
+//         $post_id = gform_get_meta($entry['id'], 'my_custom_post_id');
+//         error_log('Retrieved post ID for redirection: ' . $post_id); // This will log regardless of whether $post_id is empty.
+//         if ($post_id) {
+//             $url = get_permalink($post_id);
+//             error_log('Redirect URL: ' . $url);
+//             $confirmation = array('redirect' => $url);
+//         }
+//     }
+//     return $confirmation;
+// }
 
 // Update Note page with OpenAI response
 // Dynamically Populate the Hidden Field with the Current Post ID
@@ -68,33 +146,4 @@ function handle_openai_response($entry, $form) {
     // Redirect to the updated post
     wp_redirect(get_permalink($post_id));
     exit;
-}
-
-// Handle the File Upload and Save URL to Post Meta
-add_action('gform_after_submission_4', 'create_custom_note_page', 10, 2);
-function create_custom_note_page($entry, $form) {
-    $fileupload_field_id = '3';  // ID of the File Upload field
-    $title_field_id = '1';  // ID of the Field for the Post Title
-
-    // Get the title from the form entry
-    $post_title = rgar($entry, $title_field_id);
-
-    // Create a new post with the title from the form
-    $new_post = array(
-        'post_title'    => sanitize_text_field($post_title), // Sanitize the title
-        'post_content'  => '', // Default content, can be modified as needed
-        'post_status'   => 'publish', // Or 'draft', 'pending', etc.
-        'post_type'     => 'notes' // Your custom post type
-    );
-
-    // Insert the post and get the new post ID
-    $post_id = wp_insert_post($new_post);
-
-    // Check for file upload and update post meta
-    if (!empty($entry[$fileupload_field_id])) {
-        $file_url = $entry[$fileupload_field_id];
-        update_post_meta($post_id, 'uploaded_file_url', $file_url);
-    } else {
-        error_log('No file URL found for entry in Gravity Forms form ID 4.');
-    }
 }
