@@ -69,8 +69,7 @@ function create_custom_note_page($entry, $form) {
         error_log('Custom Stored post ID: ' . $post_id);
 
         // Immediate redirection to the newly created post
-        $redirect_url = get_permalink($post_id);
-        error_log('Redirecting to: ' . $redirect_url);
+        $redirect_url = get_permalink($post_id) . '?transcribe=true';
         wp_redirect($redirect_url);
         exit;
     }

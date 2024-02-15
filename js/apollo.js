@@ -123,6 +123,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 
+// Transcribe upon redirect to new note
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOMContentLoaded event fired. Checking for 'transcribe' parameter...");
+
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('transcribe') === 'true') {
+        console.log("'transcribe=true' found in URL parameters. Looking for the button...");
+
+        var transcribeButton = document.getElementById('transcribeAudio');
+        if (transcribeButton) {
+            console.log("Transcribe button found. Attempting to click...");
+
+            // Introduce a delay before clicking the button
+            setTimeout(function() {
+                transcribeButton.click();
+                console.log("Button click attempted after delay.");
+            }, 500); // Delay in milliseconds (1000ms = 1 second)
+        } else {
+            console.log("Transcribe button not found.");
+        }
+    } else {
+        console.log("'transcribe' parameter not set to 'true'. No action taken.");
+    }
+});
+
+
 // Safari not yet supported
 // document.addEventListener('DOMContentLoaded', function() {
 //     var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
