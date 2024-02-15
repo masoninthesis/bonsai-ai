@@ -69,11 +69,35 @@ function create_custom_note_page($entry, $form) {
         error_log('Custom Stored post ID: ' . $post_id);
 
         // Immediate redirection to the newly created post
-        $redirect_url = get_permalink($post_id) . '?transcribe=true';
-        wp_redirect($redirect_url);
-        exit;
+        // $redirect_url = get_permalink($post_id) . '?transcribe=true';
+        // wp_redirect($redirect_url);
+        // exit;
     }
 }
+
+// add_filter('gform_confirmation_4', 'gform4_custom_confirmation', 10, 4);
+// function gform4_custom_confirmation($confirmation, $form, $entry, $ajax) {
+//     // Fetch the post ID stored in the entry meta.
+//     $post_id = gform_get_meta($entry['id'], 'my_custom_post_id');
+//     // Construct the note URL with the transcribe query parameter.
+//     $note_url = get_permalink($post_id) . '?transcribe=true';
+//
+//     // Embed the URL in the confirmation message, e.g., within a hidden div.
+//     $confirmation = sprintf('<div>Your submission was successful. <div id="note-url" data-url="%s" style="display:none;"></div></div>', esc_url($note_url));
+//
+//     return $confirmation;
+// }
+
+add_filter('gform_confirmation_4', 'custom_confirmation_redirect', 10, 4);
+function custom_confirmation_redirect($confirmation, $form, $entry, $ajax) {
+    // Assuming $post_id holds the ID of the newly created note
+    $post_id = gform_get_meta($entry['id'], 'my_custom_post_id');
+    $note_url = get_permalink($post_id) . '?form_submitted=true';
+
+    return array('redirect' => $note_url);
+}
+
+
 
 // add_action('gform_after_submission', function ($entry, $form) {
 //     if ($form['id'] != 4) return;
