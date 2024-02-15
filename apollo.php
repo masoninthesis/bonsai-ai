@@ -10,14 +10,29 @@ add_filter( 'upload_mimes', 'my_custom_mime_types', 1, 1 );
 
 // Custom Post Type: Notes
 function register_notes_cpt() {
-    $args = array(
-        'public' => true,
-        'label'  => 'Notes',
-        'supports' => array('title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments')
+    $capabilities = array(
+        'edit_post'          => 'edit_note',
+        'read_post'          => 'read_note',
+        'delete_post'        => 'delete_note',
+        'edit_posts'         => 'edit_notes',
+        'edit_others_posts'  => 'edit_others_notes',
+        'publish_posts'      => 'publish_notes',
+        'read_private_posts' => 'read_private_notes',
     );
+
+    $args = array(
+        'public'        => true,
+        'label'         => 'Notes',
+        'supports'      => array('title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments'),
+        'capability_type'    => 'note',
+        'capabilities'  => $capabilities,
+        'map_meta_cap'  => true, // Important for capability mapping
+    );
+
     register_post_type('notes', $args);
 }
 add_action('init', 'register_notes_cpt');
+
 
 // GF Form ID #4 reloads after submission
 // Redirect loads form again instead of confirmation message
