@@ -185,3 +185,31 @@ function handle_openai_response($entry, $form) {
     wp_redirect(get_permalink($post_id));
     exit;
 }
+
+// Delete Notes
+function custom_delete_post() {
+    // Check if we're in the right context (action set to 'custom_delete_post') and necessary parameters are present
+    if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'custom_delete_post' && isset($_REQUEST['_wpnonce']) && isset($_REQUEST['post_id'])) {
+        // Verify nonce for security
+        if (wp_verify_nonce($_REQUEST['_wpnonce'], 'delete_post_' . $_REQUEST['post_id'])) {
+            $post_id = $_REQUEST['post_id'];
+
+            // Check if the current user can delete this post
+            if (current_user_can('delete_post', $post_id)) {
+                // Set to false to send to trash instead of permanently deleting
+                wp_delete_post($post_id, false);
+
+                // Redirect back to the referring page, effectively refreshing the page
+                $redirect_url = wp_get_referer() ? wp_get_referer() : home_url();
+                wp_redirect($redirect_url);
+                exit;
+            }
+        }
+
+        // Redirect or show error message if nonce verification fails or user doesn't have permission
+        wp_redirect(home_url());
+        exit;
+    }
+    // If the function is triggered outside its intended context, do nothing
+}
+add_action('init', 'custom_delete_post');
