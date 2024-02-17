@@ -181,10 +181,14 @@ function handle_openai_response($entry, $form) {
         'post_content' => $updated_content
     ));
 
-    // Redirect to the updated post
-    wp_redirect(get_permalink($post_id));
+    // Construct the redirect URL without the ?transcribe=true parameter
+    $redirect_url = get_permalink($post_id);
+
+    // Redirect to the updated post without the transcribe parameter
+    wp_redirect($redirect_url);
     exit;
 }
+
 
 // Delete Notes
 function custom_delete_post() {
