@@ -1,10 +1,10 @@
 <?php
 /**
- * Plugin Name: Bonsai AI
+ * Plugin Name: Apollo AI
  * Description: A WordPress plugin that adds AI functionalities such as Sensei AI, and SenseiOS
- * Version: 0.0.1-apollo-0.0.19
+ * Version: 0.0.1-apollo-0.0.21
  * Author: Jackalope Labs
- * Author URI: https://bonsai.so/
+ * Author URI: https://jackalope.io/
  */
 
 // Exit if accessed directly.
@@ -12,14 +12,14 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-// If WP-CLI is running, load the WP-CLI commands
-if (defined('WP_CLI') && WP_CLI) {
-    require_once plugin_dir_path(__FILE__) . 'bonsai-cli.php';
-}
-
 // Define BONSAI_AI_PLUGIN_FILE.
 if ( ! defined( 'BONSAI_AI_PLUGIN_FILE' ) ) {
 	define( 'BONSAI_AI_PLUGIN_FILE', __FILE__ );
+}
+
+// If WP-CLI is running, load the WP-CLI commands
+if (defined('WP_CLI') && WP_CLI) {
+    require_once plugin_dir_path(__FILE__) . 'bonsai-cli.php';
 }
 
 // Include the files
@@ -31,39 +31,11 @@ require_once plugin_dir_path(__FILE__) . 'deepgram.php';
 require_once plugin_dir_path( BONSAI_AI_PLUGIN_FILE ) . 'merge-tags.php';
 require_once plugin_dir_path( BONSAI_AI_PLUGIN_FILE ) . 'shortcodes.php';
 
-// Journal prompts functionality
-require_once plugin_dir_path( BONSAI_AI_PLUGIN_FILE ) . 'journal-prompts.php';
-
-// Journal entries functionality
-require_once plugin_dir_path(__FILE__) . 'journal-entries.php';
-
-// Chat functionality
-require_once plugin_dir_path(__FILE__) . 'chat.php';
-
 // Filters for various functionalities
 require_once plugin_dir_path(__FILE__) . 'filters.php';
 
-// Deshi user functionality
-require_once plugin_dir_path(__FILE__) . 'deshi.php';
-
 // Set goal functionality
 require_once plugin_dir_path( __FILE__ ) . 'login.php';
-
-// SenseiModules functionality
-// Ask Sensei functionality
-require_once plugin_dir_path( __FILE__ ) . 'modules/ask-sensei.php';
-// Daily checkin functionality
-require_once plugin_dir_path( __FILE__ ) . 'modules/daily-checkin.php';
-// Set goal functionality
-require_once plugin_dir_path( __FILE__ ) . 'modules/goal-setting.php';
-// Pitch Sensei
-require_once plugin_dir_path( __FILE__ ) . 'modules/pitch-sensei.php';
-
-// Goal check-in functionality
-require_once plugin_dir_path( __FILE__ ) . 'goal-checkin.php';
-
-// Goals functionality
-require_once plugin_dir_path( __FILE__ ) . 'goals.php';
 
 // Image optimization functionality
 require_once plugin_dir_path( __FILE__ ) . 'images.php';
@@ -98,14 +70,6 @@ require_once plugin_dir_path( __FILE__ ) . 'admin/deepgram-settings.php';
 // Cron Jobs
 require_once plugin_dir_path(__FILE__) . 'cron-jobs.php';
 setup_deshi_autoresponse_hooks(__FILE__);
-
-// Sensei Upgrade: Sensei upgrade password field is hidden if deshi user is already logged in
-// function hide_field_for_logged_in_users() {
-//     if (is_user_logged_in()) {
-//         wp_enqueue_script('hide-form-field', plugins_url('/js/sensei.js', __FILE__), array('jquery'), null, true);
-//     }
-// }
-// add_action('wp_enqueue_scripts', 'hide_field_for_logged_in_users');
 
 // Apollo and Bonsai JavaScript
 function apollo_ai_enqueue_scripts() {

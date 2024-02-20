@@ -112,7 +112,42 @@ function custom_confirmation_redirect($confirmation, $form, $entry, $ajax) {
     return array('redirect' => $note_url);
 }
 
+// schedule note generation custom event
+add_action('gform_after_submission_4', 'schedule_transcription_and_submission', 10, 2);
+function schedule_transcription_and_submission($entry, $form) {
+    // Get the created post ID from the entry if available
+    $post_id = rgar($entry, 'post_id'); // Ensure 'post_id' is the correct entry meta key
 
+    if (!empty($post_id)) {
+        // Schedule the custom event to run 1 minute after form submission
+        wp_schedule_single_event(time() + 60, 'process_transcription_and_submission', [$post_id]);
+    }
+}
+
+// Define note generation Scheduled Event Action
+add_action('process_transcription_and_submission', 'execute_transcription_and_form_submission');
+function execute_transcription_and_form_submission($post_id) {
+    // Run the transcription process
+    if (handle_transcription_for_cli($post_id)) {
+        // Assuming transcription text is saved, proceed to submit Form 5
+        // Retrieve the transcription text from post meta
+        $transcription_text = get_post_meta($post_id, 'transcription_text', true);
+
+        // Prepare and submit Form 5 entry with the transcription text
+        $entry_data = [
+            'input_1' => $transcription_text, // Adjust according to your form field IDs
+            // Include any other necessary form fields here
+        ];
+
+        // Submit the form using GFAPI or custom submission logic
+        GFAPI::submit_form(5, $entry_data);
+
+        // Log success or handle submission result accordingly
+        error_log("Form 5 submitted for post ID {$post_id} with transcription.");
+    } else {
+        error_log("Failed to transcribe or submit Form 5 for post ID {$post_id}.");
+    }
+}
 
 // add_action('gform_after_submission', function ($entry, $form) {
 //     if ($form['id'] != 4) return;

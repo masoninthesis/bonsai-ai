@@ -73,6 +73,68 @@ function handle_transcription() {
     }
 }
 
+function handle_transcription_for_cli($post_id) {
+    if (empty($post_id)) {
+        error_log('handle_transcription_for_cli: Post ID not provided.');
+        return false;
+    }
+
+    // Retrieve the audio URL from post metadata or use a hardcoded URL for testing
+    $audio_url = get_post_meta($post_id, 'uploaded_file_url', true);
+    // Uncomment the next line if you need to use a hardcoded URL for testing
+    // $audio_url = 'https://staging.apollohealthmd.com/app/uploads/gravity_forms/4-7f177ef23b77d6fa5d6c869ca01029d1/2024/02/recording_2024-02-06T23-30-35.webm';
+
+    if (empty($audio_url)) {
+        error_log("handle_transcription_for_cli: No audio URL found for post ID: {$post_id}");
+        return false;
+    }
+
+    $api_key = get_option('bonsai_ai_deepgram_api_key');
+    if (empty($api_key)) {
+        error_log('handle_transcription_for_cli: Deepgram API key not configured.');
+        return false;
+    }
+
+    $deepgram_url = 'https://api.deepgram.com/v1/listen';
+    $response = wp_remote_post($deepgram_url, [
+        'method'    => 'POST',
+        'timeout'   => 45,
+        'headers'   => [
+            'Authorization' => 'Token ' . $api_key,
+            'Content-Type'  => 'application/json',
+        ],
+        'body'      => json_encode([
+            'url'           => $audio_url,
+            'model'         => 'latest',
+            'language'      => 'en-US',
+            'punctuate'     => true,
+            'diarize'       => true,
+        ]),
+    ]);
+
+    if (is_wp_error($response)) {
+        $error_message = $response->get_error_message();
+        error_log("handle_transcription_for_cli: Connection to Deepgram API failed for post ID {$post_id}: {$error_message}");
+        return false;
+    }
+
+    $body = wp_remote_retrieve_body($response);
+    $transcription = json_decode($body, true);
+
+    // Log the full Deepgram response for debugging purposes
+    error_log("handle_transcription_for_cli: Deepgram Response for post ID {$post_id}: " . print_r($body, true));
+
+    if (isset($transcription['results']) && !empty($transcription['results']['channels'][0]['alternatives'][0]['transcript'])) {
+        $transcriptText = $transcription['results']['channels'][0]['alternatives'][0]['transcript'];
+        update_post_meta($post_id, 'transcription_text', $transcriptText);
+        error_log("handle_transcription_for_cli: Transcription success for post ID {$post_id}");
+        return true;
+    } else {
+        error_log("handle_transcription_for_cli: Failed to transcribe audio for post ID {$post_id}.");
+        return false;
+    }
+}
+
 // Working diarization curl
 // curl --request POST \
 //   --url 'https://api.deepgram.com/v1/listen?diarize=true&punctuate=true&utterances=true' \
