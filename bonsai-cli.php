@@ -77,7 +77,8 @@ class GF_Auto_Transcribe_Command extends WP_CLI_Command {
             if (handle_transcription_for_cli($post->ID)) {
                 WP_CLI::success("Transcription processed for post ID {$post->ID}.");
             } else {
-                WP_CLI::error("Transcription failed for post ID {$post->ID}.");
+                // Change to warning to ensure continued execution
+                WP_CLI::warning("Transcription failed for post ID {$post->ID}.");
             }
         }
     }
