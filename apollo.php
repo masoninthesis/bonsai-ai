@@ -203,17 +203,10 @@ function handle_openai_response($entry, $form) {
     // Retrieve the OpenAI response using the merge tag
     $openai_response = GFCommon::replace_variables('{openai_feed_4}', $form, $entry);
 
-    // Get the current post content
-    $post = get_post($post_id);
-    $current_content = $post->post_content;
-
-    // Append the OpenAI response to the existing content
-    $updated_content = $current_content . "\n\n" . $openai_response;
-
-    // Update the post with the new content
+    // Update the post with the new OpenAI response, replacing the original content
     wp_update_post(array(
         'ID'           => $post_id,
-        'post_content' => $updated_content
+        'post_content' => $openai_response // Set the content to the OpenAI response directly
     ));
 
     // Construct the redirect URL without the ?transcribe=true parameter
@@ -223,7 +216,6 @@ function handle_openai_response($entry, $form) {
     wp_redirect($redirect_url);
     exit;
 }
-
 
 // Delete Notes
 function custom_delete_post() {
