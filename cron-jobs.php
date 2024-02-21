@@ -35,40 +35,40 @@ function setup_deshi_autoresponse_hooks($main_file) {
 }
 
 // Apollo
-add_action('gform_after_submission_4', 'enqueue_my_custom_gf_process', 10, 2);
-function enqueue_my_custom_gf_process($entry, $form) {
-    // Pick a unique identifier for the job.
-    $job_id = wp_generate_uuid4();
-
-    // Store necessary data temporarily.
-    set_transient('gf4_auto_job_' . $job_id, json_encode([
-        'time_initiated' => current_time('timestamp'),
-        'entry_id' => $entry['id']
-    ]), HOUR_IN_SECONDS); // Keeping for 1 hour for debugging, adjust as needed.
-
-    // Schedule the event immediately.
-    if (!wp_next_scheduled('process_gf4_submission_job', [$job_id])) {
-        wp_schedule_single_event(time(), 'process_gf4_submission_job', [$job_id]);
-    }
-}
-
-add_action('process_gf4_submission_job', 'my_custom_submission_handler', 10, 1);
-function my_custom_submission_handler($job_id) {
-    $job_payload = get_transient('gf4_auto_job_' . $job_id);
-    if ($job_payload) {
-        $job_payload = json_decode($job_payload, true);
-        $entry_id = $job_payload['entry_id'];
-
-        // Ensure full path to WP CLI and proper command syntax
-        $transcribe_output = shell_exec('/usr/bin/wp gf-auto-transcribe process');
-        // Log the output for debugging
-        error_log("Transcribe Output: " . print_r($transcribe_output, true));
-
-        $submit_output = shell_exec('/usr/bin/wp gf-auto-submit process');
-        // Log the output for debugging
-        error_log("Submit Output: " . print_r($submit_output, true));
-
-        // Cleanup after completion
-        delete_transient('gf4_auto_job_' . $job_id);
-    }
-}
+// add_action('gform_after_submission_4', 'enqueue_my_custom_gf_process', 10, 2);
+// function enqueue_my_custom_gf_process($entry, $form) {
+//     // Pick a unique identifier for the job.
+//     $job_id = wp_generate_uuid4();
+//
+//     // Store necessary data temporarily.
+//     set_transient('gf4_auto_job_' . $job_id, json_encode([
+//         'time_initiated' => current_time('timestamp'),
+//         'entry_id' => $entry['id']
+//     ]), HOUR_IN_SECONDS); // Keeping for 1 hour for debugging, adjust as needed.
+//
+//     // Schedule the event immediately.
+//     if (!wp_next_scheduled('process_gf4_submission_job', [$job_id])) {
+//         wp_schedule_single_event(time(), 'process_gf4_submission_job', [$job_id]);
+//     }
+// }
+//
+// add_action('process_gf4_submission_job', 'my_custom_submission_handler', 10, 1);
+// function my_custom_submission_handler($job_id) {
+//     $job_payload = get_transient('gf4_auto_job_' . $job_id);
+//     if ($job_payload) {
+//         $job_payload = json_decode($job_payload, true);
+//         $entry_id = $job_payload['entry_id'];
+//
+//         // Ensure full path to WP CLI and proper command syntax
+//         $transcribe_output = shell_exec('/usr/bin/wp gf-auto-transcribe process');
+//         // Log the output for debugging
+//         error_log("Transcribe Output: " . print_r($transcribe_output, true));
+//
+//         $submit_output = shell_exec('/usr/bin/wp gf-auto-submit process');
+//         // Log the output for debugging
+//         error_log("Submit Output: " . print_r($submit_output, true));
+//
+//         // Cleanup after completion
+//         delete_transient('gf4_auto_job_' . $job_id);
+//     }
+// }
