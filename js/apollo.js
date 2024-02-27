@@ -31,23 +31,16 @@ document.addEventListener('DOMContentLoaded', function() {
     function startRecording() {
         navigator.mediaDevices.getUserMedia({ audio: true })
             .then(stream => {
-                try {
-                    mediaRecorder = new MediaRecorder(stream);
-
-                    mediaRecorder.ondataavailable = handleDataAvailable;
-                    mediaRecorder.onstop = handleRecordingStop;
-
-                    mediaRecorder.start();
-                    console.log('Recording started without specifying MIME type');
-                } catch (error) {
-                    console.error('Error initializing MediaRecorder:', error);
-                }
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = handleDataAvailable;
+                mediaRecorder.onstop = handleRecordingStop;
+                mediaRecorder.start();
+                console.log('Recording started');
             })
             .catch(error => {
                 console.error('Error accessing the microphone:', error);
             });
     }
-
 
     function handleDataAvailable(event) {
         if (event.data.size > 0) {
@@ -57,18 +50,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function stopRecording() {
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-            mediaRecorder.stop(); // Stop the media recorder
+            mediaRecorder.stop();
             console.log('Stop recording called');
-
-            // Stop each track on the stream to release the microphone
             mediaRecorder.stream.getTracks().forEach(track => track.stop());
-
-            // This flag 'hasBeenRecorded' might need to be set true here instead,
-            // if its purpose is to track whether recording has occurred at all for session
             hasBeenRecorded = true;
-
-            // Show the form container after stopping the recording
-            // This adjustment ensures the form is displayed after the first recording session completes
             formContainer.classList.remove('hidden');
             formContainer.classList.add('visible');
         } else {
@@ -76,16 +61,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-
     function handleRecordingStop() {
-        // Use the MIME type from mediaRecorder or a default
         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-        // Use a timestamp or another method to generate a unique filename without codec information
         const fileName = `recording_${new Date().toISOString().split('.')[0].replace(/:/g, '-')}.webm`;
         const file = new File([audioBlob], fileName, { type: 'audio/webm' });
 
         attachFileToInput(file);
-        createDownloadLink(audioUrl, fileName);
+        createDownloadLink(URL.createObjectURL(file), fileName);
+
+        // Attempt to fire the Bootstrap modal specifically here when recording stops.
+        console.log('Attempting to show modal...');
+        showBootstrapModal('addNoteModal');
     }
 
     function attachFileToInput(file) {
@@ -97,7 +83,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('File successfully attached to input');
         } else {
             console.error('File input not found');
-            // Handle the error or fallback scenario
         }
     }
 
@@ -107,18 +92,20 @@ document.addEventListener('DOMContentLoaded', function() {
             downloadLink = document.createElement('a');
             downloadLink.id = 'downloadLink';
             downloadLink.href = audioUrl;
-            downloadLink.download = fileName; // Use the dynamically generated file name
-            // Set inner HTML to include "Download" text with icon and styling
+            downloadLink.download = fileName;
             downloadLink.innerHTML = '<small class="text-secondary pl-3"><i class="fas fa-download mr-2"></i> Download Recording</small>';
             document.getElementById('recordButton').insertAdjacentElement('afterend', downloadLink);
         } else {
-            // Update the link if it already exists
             downloadLink.href = audioUrl;
-            downloadLink.download = fileName; // Update the filename as well
+            downloadLink.download = fileName;
         }
+        downloadLink.style.display = 'inline';
+    }
 
-        // Ensure the link is always visible after recording stops
-        downloadLink.style.display = 'inline'; // Adjust as necessary for your layout
+    // Show addNoteModal when recording stops, adjusted for Bootstrap 4
+    function showBootstrapModal(modalId) {
+        console.log(`Showing modal with ID: ${modalId}`);
+        jQuery('#' + modalId).modal('show');
     }
 
 });
@@ -149,51 +136,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("'transcribe' parameter not set to 'true'. No action taken.");
     }
 });
-
-// Safari not yet supported
-// document.addEventListener('DOMContentLoaded', function() {
-//     var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-//
-//     if (isSafari) {
-//         var warningContainer = document.getElementById('safari-warning-container');
-//         var alertDiv = document.createElement('div');
-//         alertDiv.className = 'alert alert-warning';
-//         alertDiv.textContent = 'If using Safari, download the note after recording stops, and select Choose File to attach it– or use a different browser to remove this step';
-//         warningContainer.appendChild(alertDiv);
-//     }
-// });
-
-// Upload the File Using WP-API
-// function uploadAudioFile(file) {
-//     const formData = new FormData();
-//     formData.append('file', file);
-//
-//     const username = 'admin'; // Your WordPress username
-//     const appPassword = 'Mn6q ZgLL rPDq 6cfL yEpv HGjc'.replace(/\s/g, ''); // Your application password with spaces removed
-//
-//     fetch('/wp-json/wp/v2/media', {
-//         method: 'POST',
-//         body: formData,
-//         headers: {
-//           'Authorization': 'Basic ' + btoa(username + ':' + appPassword),
-//           'Content-Disposition': 'attachment; filename=recording.webm'
-//         }
-//     })
-//
-//     .then(response => {
-//       if (!response.ok) {
-//           throw new Error('Network response was not ok ' + response.statusText);
-//       }
-//       return response.json();
-//     })
-//
-//     .then(data => {
-//         console.log('Success:', data);
-//     })
-//     .catch((error) => {
-//         console.error('Error:', error);
-//     });
-// }
 
 // Note filtering
 document.addEventListener('DOMContentLoaded', function() {

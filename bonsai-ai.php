@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Apollo AI
  * Description: A WordPress plugin that adds AI functionalities such as Sensei AI, and SenseiOS
- * Version: 0.0.1-apollo-0.0.25
+ * Version: 0.0.1-apollo-0.0.26
  * Author: Jackalope Labs
  * Author URI: https://jackalope.io/
  */

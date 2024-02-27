@@ -7,6 +7,23 @@ function my_custom_mime_types( $mimes ) {
 }
 add_filter( 'upload_mimes', 'my_custom_mime_types', 1, 1 );
 
+// function custom_notes_permalink_structure($post_link, $post, $leavename, $sample) {
+//     if ($post->post_type == 'notes') {
+//         // Generate time-based elements and author slug
+//         $second = get_the_time('s', $post);
+//         $minute = get_the_time('i', $post);
+//         $hour = get_the_time('H', $post);
+//         $author_slug = get_the_author_meta('user_nicename', $post->post_author);
+//         $postname = $post->post_name;
+//
+//         // Construct the new permalink
+//         $new_link = home_url("/notes/$second-$minute-$hour-$author_slug-$postname/");
+//         return $new_link;
+//     }
+//     return $post_link;
+// }
+// add_filter('post_type_link', 'custom_notes_permalink_structure', 10, 4);
+
 
 // Custom Post Type: Notes
 function register_notes_cpt() {
@@ -21,12 +38,13 @@ function register_notes_cpt() {
     );
 
     $args = array(
-        'public'        => true,
-        'label'         => 'Notes',
-        'supports'      => array('title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments'),
-        'capability_type'    => 'note',
-        'capabilities'  => $capabilities,
-        'map_meta_cap'  => true, // Important for capability mapping
+        'public'            => true,
+        'label'             => 'Notes',
+        'supports'          => array('title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments'),
+        'capability_type'   => 'note',
+        'capabilities'      => $capabilities,
+        'map_meta_cap'      => true, // Important for capability mapping
+        'rewrite'           => array('slug' => 'notes'), // Set the base slug to 'notes'
     );
 
     register_post_type('notes', $args);
