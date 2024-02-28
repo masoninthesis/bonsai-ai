@@ -212,7 +212,6 @@ function populate_current_post_id($value) {
     return isset($post->ID) ? $post->ID : '';
 }
 
-// Handle Form Submission and Update Post Content
 add_action('gform_after_submission_5', 'handle_openai_response', 10, 2);
 function handle_openai_response($entry, $form) {
     // Retrieve the dynamically populated post ID from the hidden field
@@ -227,12 +226,16 @@ function handle_openai_response($entry, $form) {
         'post_content' => $openai_response // Set the content to the OpenAI response directly
     ));
 
-    // Construct the redirect URL without the ?transcribe=true parameter
-    $redirect_url = get_permalink($post_id);
+    // Check if WP_CLI is defined and true, skip redirection if so
+    if (!defined('WP_CLI') || !WP_CLI) {
+        // Construct the redirect URL without the ?transcribe=true parameter
+        $redirect_url = get_permalink($post_id);
 
-    // Redirect to the updated post without the transcribe parameter
-    wp_redirect($redirect_url);
-    exit;
+        // Redirect to the updated post without the transcribe parameter
+        wp_redirect($redirect_url);
+        exit;
+    }
+    // If WP_CLI is defined and true, do not perform any redirection
 }
 
 // Delete Notes

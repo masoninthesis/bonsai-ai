@@ -29,22 +29,31 @@ class GF_Auto_Submit_Command extends WP_CLI_Command {
         $posts = get_posts([
             'post_type' => 'notes',
             'posts_per_page' => -1,
+            'date_query' => [
+                [
+                    'after' => '1 day ago' // Fetch posts from the last 24 hours
+                ]
+            ],
             'meta_query' => [
+                'relation' => 'AND',
                 [
                     'key' => 'transcription_text',
-                    'compare' => 'EXISTS', // Changed to fetch posts with existing transcription_text
+                    'compare' => 'EXISTS',
+                ],
+                [
+                    'key' => 'form_submitted',
+                    'compare' => 'NOT EXISTS', // Check if the form submission flag is not set
                 ],
             ],
         ]);
 
         foreach ($posts as $post) {
-            // Fetch the transcription text from post metadata
             $transcription_text = get_post_meta($post->ID, 'transcription_text', true);
 
-            // Prepare the form entry with actual transcription text instead of dummy data
+            // Prepare and submit the form entry
             $entry = [
-                'input_1' => $transcription_text, // Use the actual transcription text
-                'input_2' => $post->ID, // Post ID for field 2
+                'input_1' => $transcription_text,
+                'input_2' => $post->ID,
             ];
 
             $result = GFAPI::submit_form($form_id, $entry);
@@ -52,6 +61,8 @@ class GF_Auto_Submit_Command extends WP_CLI_Command {
                 WP_CLI::error(sprintf('Failed to submit form for post ID %d: %s', $post->ID, $result->get_error_message()));
             } else {
                 WP_CLI::success(sprintf('Form submitted for post ID %d with transcription text.', $post->ID));
+                // Mark the post as having the form submitted to avoid future submissions
+                update_post_meta($post->ID, 'form_submitted', 'yes');
             }
         }
     }
@@ -61,13 +72,15 @@ WP_CLI::add_command('gf-auto-submit', 'GF_Auto_Submit_Command');
 
 
 class GF_Auto_Transcribe_Command extends WP_CLI_Command {
-    /**
-     * Processes transcription for posts missing 'transcription_text' metadata.
-     */
     public function process($args, $assoc_args) {
         $posts = get_posts([
             'post_type' => 'notes',
             'posts_per_page' => -1,
+            'date_query' => [
+                [
+                    'after' => '1 day ago'
+                ]
+            ],
             'meta_query' => [
                 ['key' => 'transcription_text', 'compare' => 'NOT EXISTS'],
             ],
@@ -77,7 +90,6 @@ class GF_Auto_Transcribe_Command extends WP_CLI_Command {
             if (handle_transcription_for_cli($post->ID)) {
                 WP_CLI::success("Transcription processed for post ID {$post->ID}.");
             } else {
-                // Change to warning to ensure continued execution
                 WP_CLI::warning("Transcription failed for post ID {$post->ID}.");
             }
         }
