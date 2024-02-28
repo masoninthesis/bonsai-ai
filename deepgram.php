@@ -17,10 +17,10 @@ function handle_transcription() {
 
     $post_id = sanitize_text_field($_POST['post_id']);
     // Original dynamic retrieval from post metadata (replace this line)
-    // $audio_url = get_post_meta($post_id, 'uploaded_file_url', true);
+    $audio_url = get_post_meta($post_id, 'uploaded_file_url', true);
 
     // Hardcoded URL for testing
-    $audio_url = 'https://staging.apollohealthmd.com/app/uploads/gravity_forms/4-7f177ef23b77d6fa5d6c869ca01029d1/2024/02/recording_2024-02-06T23-30-35.webm';
+    // $audio_url = 'https://staging.apollohealthmd.com/app/uploads/gravity_forms/4-7f177ef23b77d6fa5d6c869ca01029d1/2024/02/recording_2024-02-06T23-30-35.webm';
 
 
     if (empty($audio_url)) {
@@ -80,9 +80,9 @@ function handle_transcription_for_cli($post_id) {
     }
 
     // Retrieve the audio URL from post metadata or use a hardcoded URL for testing
-    // $audio_url = get_post_meta($post_id, 'uploaded_file_url', true);
+    $audio_url = get_post_meta($post_id, 'uploaded_file_url', true);
     // Uncomment the next line if you need to use a hardcoded URL for testing
-    $audio_url = 'https://staging.apollohealthmd.com/app/uploads/gravity_forms/4-7f177ef23b77d6fa5d6c869ca01029d1/2024/02/recording_2024-02-06T23-30-35.webm';
+    // $audio_url = 'https://staging.apollohealthmd.com/app/uploads/gravity_forms/4-7f177ef23b77d6fa5d6c869ca01029d1/2024/02/recording_2024-02-06T23-30-35.webm';
 
     if (empty($audio_url)) {
         error_log("handle_transcription_for_cli: No audio URL found for post ID: {$post_id}");
