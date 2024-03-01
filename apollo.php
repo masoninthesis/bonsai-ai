@@ -221,10 +221,13 @@ function handle_openai_response($entry, $form) {
     $openai_response = GFCommon::replace_variables('{openai_feed_4}', $form, $entry);
 
     // Update the post with the new OpenAI response, replacing the original content
-    wp_update_post(array(
-        'ID'           => $post_id,
-        'post_content' => $openai_response // Set the content to the OpenAI response directly
-    ));
+    // wp_update_post(array(
+    //     'ID'           => $post_id,
+    //     'post_content' => $openai_response // Set the content to the OpenAI response directly
+    // ));
+
+    // Update the ACF field 'soap_note' with the OpenAI response
+    update_field('soap_note', $openai_response, $post_id);
 
     // Check if WP_CLI is defined and true, skip redirection if so
     if (!defined('WP_CLI') || !WP_CLI) {
@@ -237,6 +240,7 @@ function handle_openai_response($entry, $form) {
     }
     // If WP_CLI is defined and true, do not perform any redirection
 }
+
 
 // Delete Notes
 function custom_delete_post() {
@@ -265,3 +269,34 @@ function custom_delete_post() {
     // If the function is triggered outside its intended context, do nothing
 }
 add_action('init', 'custom_delete_post');
+
+// Note Editing
+// Hook for authenticated users
+add_action('admin_post_save_soap_note', 'handle_save_soap_note');
+// Hook for unauthenticated users
+add_action('admin_post_nopriv_save_soap_note', 'handle_save_soap_note');
+
+function handle_save_soap_note() {
+    // Verify nonce for security
+    $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;
+    check_admin_referer('save_soap_note_' . $post_id, 'soap_note_nonce');
+
+    if (current_user_can('edit_post', $post_id)) {
+        $field_name = 'soap_note'; // This is correct for 'update_field' as long as 'soap_note' is the field name
+
+        // Ensure we're grabbing the correct POST data. If ACF fields are directly used, ACF should handle $_POST['acf'] data.
+        $acf_data = isset($_POST['acf']) ? $_POST['acf'] : false;
+        if ($acf_data) {
+            // Assuming ACF's 'acf' array contains our field data. You might need to adjust based on the actual field key structure in $_POST.
+            $content = array_values($acf_data)[0]; // This is a simplified assumption; adjust based on actual structure.
+
+            // Update the ACF field
+            update_field($field_name, $content, $post_id);
+
+            // Redirect back to the same page to show the updated content
+            wp_redirect(get_permalink($post_id));
+            exit;
+        }
+    }
+    wp_die('You do not have permission to edit this post or invalid submission.');
+}
